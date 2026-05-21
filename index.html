@@ -38,7 +38,7 @@
             <div class="logo-section">
                 <div class="heart-beat">💌</div>
                 <h1 class="title">Dmaz Coba Coba</h1>
-                <p class="subtitle">Generator Pesan Cinta AI yang Bikin Baper Abis!</p>
+                <p class="subtitle">Generator Pesan Cinta AI yang Bikin Baper Abis!<br><span style="font-size:0.7rem;opacity:0.85;">✨ Hemat API: 1x generate, dia gak perlu API key</span></p>
             </div>
 
             <!-- Stats / Features -->
@@ -161,7 +161,13 @@
                     <button class="action-btn share-btn" onclick="shareLink()">💬 WhatsApp</button>
                     <button class="action-btn preview-btn" onclick="previewLink()">👁 Preview</button>
                 </div>
+                <button id="regenerateBtn" class="regenerate-btn" onclick="regenerateMessage()" style="display:none;width:100%;margin-top:10px;padding:10px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:10px;font-size:0.8rem;cursor:pointer;font-family:'Poppins',sans-serif;">
+                    🔄 Tidak suka? Generate Ulang
+                </button>
                 <p id="copyNotif" class="copy-notif hidden">✅ Link berhasil disalin!</p>
+                <p style="text-align:center;margin-top:10px;font-size:0.7rem;color:rgba(255,255,255,0.7);">
+                    💡 <strong>Hemat API:</strong> Pesan sudah di-generate sekali, dia gak perlu API key!
+                </p>
             </div>
 
             <!-- How to use accordion -->
@@ -188,7 +194,7 @@
                     <span>📸</span> @dmsmaul05
                 </a>
             </div>
-            <div class="footer-copy">© 2026 Dmaz Coba Coba • v3.0</div>
+            <div class="footer-copy">© 2026 Dmaz Coba Coba • v5.0 - Hemat API ✨</div>
         </footer>
     </div>
 
