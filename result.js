@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = 'AIzaSyD-lLz12FRQ4jqgXdPBVo-ZzREQRvTcStg';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 // Get parameters from URL
 const urlParams = new URLSearchParams(window.location.search);
