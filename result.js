@@ -1,10 +1,8 @@
-const GEMINI_API_KEY = 'AIzaSyAdMBLxwhoG7FMGWOHTmkmTzogKVmj8OQ4';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
 // Get parameters from URL
 const urlParams = new URLSearchParams(window.location.search);
 const nama = urlParams.get('nama');
 const hubungan = urlParams.get('hubungan');
+const apiKey = urlParams.get('key');
 
 // Display name
 document.getElementById('namaTarget').textContent = nama || 'Sayang';
@@ -16,11 +14,13 @@ async function generateRomanticMessage() {
     const errorContainer = document.getElementById('errorContainer');
     const romanticMessage = document.getElementById('romanticMessage');
 
-    if (!nama || !hubungan) {
+    if (!nama || !hubungan || !apiKey) {
         loading.classList.add('hidden');
         errorContainer.classList.remove('hidden');
         return;
     }
+
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
     const hubunganText = {
         'pacar': 'pacar',
@@ -64,7 +64,7 @@ Gunakan bahasa yang puitis, romantis, dan menyentuh hati. Jangan gunakan markdow
         });
 
         if (!response.ok) {
-            throw new Error('API request failed');
+            throw new Error('API request failed: ' + response.status);
         }
 
         const data = await response.json();

@@ -1,6 +1,20 @@
+// Load saved API key from localStorage
+window.addEventListener('DOMContentLoaded', function() {
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) {
+        document.getElementById('apiKey').value = savedKey;
+    }
+});
+
 function generateLink() {
+    const apiKey = document.getElementById('apiKey').value.trim();
     const nama = document.getElementById('nama').value.trim();
     const hubungan = document.getElementById('hubungan').value;
+
+    if (!apiKey) {
+        alert('Masukkan API Key Gemini dulu ya!');
+        return;
+    }
 
     if (!nama) {
         alert('Masukkan nama pasangan dulu ya!');
@@ -12,11 +26,15 @@ function generateLink() {
         return;
     }
 
-    // Generate link with parameters
+    // Save API key to localStorage
+    localStorage.setItem('gemini_api_key', apiKey);
+
+    // Generate link with parameters (including key)
     const baseUrl = window.location.href.replace('index.html', '').replace(/\/$/, '');
     const params = new URLSearchParams({
         nama: nama,
-        hubungan: hubungan
+        hubungan: hubungan,
+        key: apiKey
     });
     
     const link = `${baseUrl}/result.html?${params.toString()}`;
