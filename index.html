@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bucin Romantis - Generator Kata Cinta</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Satisfy&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Satisfy&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Particles Background -->
     <div class="particles" id="particles"></div>
     
     <div class="container">
@@ -16,80 +15,80 @@
             <div class="card-glow"></div>
             
             <div class="logo-section">
-                <div class="heart-beat">&#128140;</div>
+                <div class="heart-beat">💌</div>
                 <h1 class="title">Bucin Romantis</h1>
-                <p class="subtitle">Kirim pesan cinta spesial yang bikin baper</p>
+                <p class="subtitle">Kirim pesan cinta multi-slide yang bikin baper abis</p>
             </div>
             
             <div class="form-section">
                 <div class="form-group">
                     <label for="apiKey">
-                        <span class="label-icon">&#128273;</span> API Key Gemini
+                        <span class="label-icon">🔑</span> API Key Gemini
                     </label>
                     <div class="input-wrapper">
                         <input type="password" id="apiKey" placeholder="Masukkan API Key..." />
-                        <button class="toggle-eye" onclick="toggleApiKey()" id="eyeBtn">&#128065;</button>
+                        <button class="toggle-eye" onclick="toggleApiKey()" id="eyeBtn">👁</button>
                     </div>
                     <small class="hint">Disimpan di browser kamu saja, aman!</small>
                 </div>
 
                 <div class="form-group">
                     <label for="pengirim">
-                        <span class="label-icon">&#128100;</span> Nama Pengirim (Kamu)
+                        <span class="label-icon">👤</span> Nama Pengirim (Kamu)
                     </label>
                     <input type="text" id="pengirim" placeholder="Nama kamu..." />
                 </div>
 
                 <div class="form-group">
                     <label for="nama">
-                        <span class="label-icon">&#128149;</span> Nama Dia
+                        <span class="label-icon">💕</span> Nama Dia
                     </label>
                     <input type="text" id="nama" placeholder="Nama orang yang kamu sayang..." />
                 </div>
                 
                 <div class="form-group">
                     <label for="hubungan">
-                        <span class="label-icon">&#128146;</span> Hubungan
+                        <span class="label-icon">💍</span> Hubungan
                     </label>
                     <select id="hubungan">
                         <option value="">-- Pilih Hubungan --</option>
-                        <option value="pacar">&#128150; Pacar</option>
-                        <option value="suami">&#128141; Suami</option>
-                        <option value="istri">&#128141; Istri</option>
-                        <option value="gebetan">&#128536; Gebetan</option>
-                        <option value="mantan">&#128148; Mantan</option>
-                        <option value="sahabat">&#127775; Sahabat Spesial</option>
-                        <option value="crush">&#129505; Crush</option>
+                        <option value="pacar">💖 Pacar</option>
+                        <option value="suami">💒 Suami</option>
+                        <option value="istri">💒 Istri</option>
+                        <option value="gebetan">😘 Gebetan</option>
+                        <option value="mantan">💔 Mantan</option>
+                        <option value="sahabat">🌟 Sahabat Spesial</option>
+                        <option value="crush">🩷 Crush</option>
                     </select>
                 </div>
                 
                 <button id="generateBtn" onclick="generateLink()">
-                    <span class="btn-sparkle">&#10024;</span>
+                    <span class="btn-sparkle">✨</span>
                     <span>Buat Pesan Cinta</span>
-                    <span class="btn-sparkle">&#10024;</span>
+                    <span class="btn-sparkle">✨</span>
                 </button>
             </div>
             
             <div id="result" class="result hidden">
                 <div class="result-header">
-                    <span>&#127881;</span> Link sudah jadi untuk <strong id="resultNama"></strong>!
+                    <span>🎉</span> Link sudah jadi untuk <strong id="resultNama"></strong>!
                 </div>
                 <div class="link-box">
                     <a id="generatedLink" href="#" target="_blank"></a>
                 </div>
                 <div class="result-actions">
                     <button class="copy-btn" onclick="copyLink()">
-                        <span>&#128203;</span> Salin Link
+                        <span>📋</span> Salin
                     </button>
                     <button class="share-btn" onclick="shareLink()">
-                        <span>&#128172;</span> Share
+                        <span>💬</span> Share WA
                     </button>
                 </div>
-                <p id="copyNotif" class="copy-notif hidden">&#10004; Link berhasil disalin!</p>
+                <p id="copyNotif" class="copy-notif hidden">✔ Link berhasil disalin!</p>
             </div>
         </div>
         
-        <p class="footer-text">Made with &#10084;&#65039; by Bucin Romantis</p>
+        <p class="footer-text">Made with ❤️ by Bucin Romantis</p>
     </div>
 
     <script src="app.js"></script>

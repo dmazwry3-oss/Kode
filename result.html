@@ -5,101 +5,176 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pesan Cinta Untukmu</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Satisfy&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Satisfy&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body class="result-page">
     <!-- Particles -->
     <div class="particles" id="particles"></div>
-    
-    <!-- Floating Hearts -->
+    <!-- Floating Elements -->
     <div class="floating-elements" id="floatingElements"></div>
 
-    <div class="container">
-        <!-- Envelope Animation -->
-        <div id="envelopeScreen" class="envelope-screen">
-            <div class="envelope-wrapper">
-                <p class="envelope-label">Kamu punya pesan cinta...</p>
-                <div class="envelope" id="envelope" onclick="openEnvelope()">
-                    <div class="envelope-top"></div>
-                    <div class="envelope-body">
-                        <div class="envelope-heart">&#128140;</div>
-                    </div>
+    <!-- SLIDE CONTAINER -->
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- SLIDE 1: Hai + Intro -->
+        <div class="slide active" id="slide1">
+            <div class="slide-content centered">
+                <div class="big-sticker animate-bounce">👋</div>
+                <h1 class="slide-title fade-in-up">Hai, <span id="namaSlide1"></span>!</h1>
+                <p class="slide-subtitle fade-in-up delay1">Seseorang mengirim pesan spesial untukmu...</p>
+                <div class="sticker-row fade-in-up delay2">
+                    <span class="sticker-bounce">💌</span>
+                    <span class="sticker-bounce">✨</span>
+                    <span class="sticker-bounce">🦋</span>
                 </div>
-                <p class="tap-text">Tap untuk buka</p>
+                <button class="next-btn fade-in-up delay3" onclick="nextSlide()">
+                    Geser <span class="arrow">→</span>
+                </button>
             </div>
         </div>
 
-        <!-- Main Message -->
-        <div id="messageScreen" class="message-screen hidden">
-            <div class="card glass-card message-card">
-                <div class="card-glow"></div>
-                
-                <!-- Loading State -->
-                <div id="loading" class="loading-section">
-                    <div class="love-loader">
-                        <div class="heart-loading">&#128147;</div>
-                    </div>
-                    <p class="loading-text">Menulis kata-kata cinta untukmu...</p>
-                    <div class="loading-dots">
-                        <span>.</span><span>.</span><span>.</span>
-                    </div>
+        <!-- SLIDE 2: Loading + Stiker -->
+        <div class="slide" id="slide2">
+            <div class="slide-content centered">
+                <div class="sticker-grid">
+                    <span class="sticker-float">🌹</span>
+                    <span class="sticker-float">💕</span>
+                    <span class="sticker-float">🥰</span>
+                    <span class="sticker-float">💗</span>
                 </div>
-                
-                <!-- Message Content -->
-                <div id="messageContainer" class="message-content hidden">
-                    <div class="message-header">
-                        <div class="sticker-row">
-                            <span class="float-sticker">&#128149;</span>
-                            <span class="float-sticker">&#127801;</span>
-                            <span class="float-sticker">&#128149;</span>
-                        </div>
-                        <h1 class="message-title">Untukmu, <span id="namaTarget"></span></h1>
-                        <div class="separator">
-                            <span>&#10045;</span>
-                            <div class="line"></div>
-                            <span>&#10045;</span>
-                        </div>
-                    </div>
-                    
-                    <div class="message-body">
-                        <div class="quote-decoration left">&ldquo;</div>
-                        <p id="romanticMessage" class="romantic-text"></p>
-                        <div class="quote-decoration right">&rdquo;</div>
-                    </div>
-                    
-                    <div class="message-stickers">
-                        <span class="sticker-animated">&#128152;</span>
-                        <span class="sticker-animated">&#129392;</span>
-                        <span class="sticker-animated">&#128144;</span>
-                        <span class="sticker-animated">&#128155;</span>
-                        <span class="sticker-animated">&#128150;</span>
-                    </div>
-                    
-                    <div class="message-footer">
-                        <div class="from-section">
-                            <p class="from-label">Dengan segenap cinta,</p>
-                            <p class="from-name" id="fromName">Seseorang yang menyayangimu</p>
-                        </div>
-                        <div class="footer-decoration">
-                            <span>&#127801;</span>
-                            <span>&#10024;</span>
-                            <span>&#128140;</span>
-                            <span>&#10024;</span>
-                            <span>&#127801;</span>
-                        </div>
-                    </div>
+                <h2 class="slide-text-romantic">Kamu tau gak?</h2>
+                <p class="slide-text-sub">Setiap hari aku selalu memikirkanmu...</p>
+                <div class="sticker-row">
+                    <span class="sticker-bounce">🫠</span>
+                    <span class="sticker-bounce">💫</span>
+                    <span class="sticker-bounce">🤭</span>
                 </div>
-                
-                <!-- Error State -->
-                <div id="errorContainer" class="error-section hidden">
-                    <div class="error-icon">&#128546;</div>
-                    <p id="errorMessage">Oops! Gagal memuat pesan cinta.</p>
-                    <button class="retry-btn" onclick="location.reload()">
-                        &#128260; Coba Lagi
-                    </button>
-                </div>
+                <button class="next-btn" onclick="nextSlide()">
+                    Geser lagi <span class="arrow">→</span>
+                </button>
             </div>
         </div>
+
+        <!-- SLIDE 3: Kata-kata AI Page 1 -->
+        <div class="slide" id="slide3">
+            <div class="slide-content">
+                <div class="message-slide-header">
+                    <span class="big-emoji-top">💝</span>
+                    <h2 class="slide-heading">Untukmu, <span id="namaSlide3"></span></h2>
+                    <div class="heading-line"></div>
+                </div>
+                <div class="message-box">
+                    <div class="quote-left">"</div>
+                    <p id="messageP1" class="message-text"></p>
+                    <div class="quote-right">"</div>
+                </div>
+                <div id="loadingSlide3" class="mini-loading">
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <p>Menulis pesan...</p>
+                </div>
+                <button class="next-btn" id="nextBtn3" onclick="nextSlide()" style="display:none">
+                    Lanjut <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Kata-kata AI Page 2 + Stiker banyak -->
+        <div class="slide" id="slide4">
+            <div class="slide-content">
+                <div class="sticker-explosion">
+                    <span>💖</span><span>🌸</span><span>✨</span>
+                    <span>🦋</span><span>💫</span><span>🌺</span>
+                </div>
+                <div class="message-box">
+                    <p id="messageP2" class="message-text"></p>
+                </div>
+                <div class="sticker-row-big">
+                    <span class="sticker-animated">😍</span>
+                    <span class="sticker-animated">🥹</span>
+                    <span class="sticker-animated">💘</span>
+                    <span class="sticker-animated">🫶</span>
+                </div>
+                <button class="next-btn" onclick="nextSlide()">
+                    Masih ada lagi <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Kata-kata AI Page 3 + Janji -->
+        <div class="slide" id="slide5">
+            <div class="slide-content">
+                <div class="promise-header">
+                    <span class="big-sticker animate-pulse">🤞</span>
+                    <h2 class="promise-title">Janjiku untukmu...</h2>
+                </div>
+                <div class="message-box promise-box">
+                    <p id="messageP3" class="message-text"></p>
+                </div>
+                <div class="sticker-row">
+                    <span class="sticker-bounce">💪</span>
+                    <span class="sticker-bounce">🫀</span>
+                    <span class="sticker-bounce">♾️</span>
+                </div>
+                <button class="next-btn" onclick="nextSlide()">
+                    Geser lagi <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Penutup + Dari siapa -->
+        <div class="slide" id="slide6">
+            <div class="slide-content centered">
+                <div class="final-stickers">
+                    <span class="confetti">🎊</span>
+                    <span class="confetti">💝</span>
+                    <span class="confetti">🎊</span>
+                </div>
+                <div class="final-message">
+                    <p id="messageP4" class="message-text final-text"></p>
+                </div>
+                <div class="from-card">
+                    <p class="from-label">Dengan segenap cinta,</p>
+                    <p class="from-name" id="fromName">Seseorang yang menyayangimu</p>
+                </div>
+                <div class="final-decoration">
+                    <span>🌹</span>
+                    <span>✨</span>
+                    <span>💌</span>
+                    <span>✨</span>
+                    <span>🌹</span>
+                </div>
+                <div class="final-sticker-grid">
+                    <span>🥰</span><span>💕</span><span>😘</span>
+                    <span>💗</span><span>🫠</span><span>💞</span>
+                    <span>🦋</span><span>🌸</span><span>💖</span>
+                </div>
+                <button class="replay-btn" onclick="location.reload()">
+                    🔄 Baca Ulang
+                </button>
+            </div>
+        </div>
+
+        <!-- ERROR SLIDE -->
+        <div class="slide" id="slideError" style="display:none">
+            <div class="slide-content centered">
+                <div class="big-sticker">😢</div>
+                <h2 class="error-title">Oops!</h2>
+                <p id="errorMessage" class="error-text">Gagal memuat pesan cinta.</p>
+                <button class="retry-btn" onclick="location.reload()">🔄 Coba Lagi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide Progress -->
+    <div class="progress-dots" id="progressDots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
     </div>
 
     <script src="result.js"></script>
