@@ -96,17 +96,26 @@ async function generateLink() {
 
     try {
         showToast('🤖 AI sedang membuat pesan, tunggu sebentar...');
-        const aiText = await callGemini(apiKey, nama, hubungan, tema, panjang, cerita, pengirim);
+        let aiText = await callGemini(apiKey, nama, hubungan, tema, panjang, cerita, pengirim);
         
-        if (!aiText) {
-            showToast('❌ Gagal generate pesan, coba lagi');
-            btn.innerHTML = btnOriginal;
-            btn.disabled = false;
-            return;
+        // Validate: must have 6 parts
+        let parts = parseAndValidateParts(aiText);
+        
+        // If invalid, retry once with even stricter prompt
+        if (!parts || parts.length < 6) {
+            showToast('🔄 Memperbaiki pesan, sebentar...');
+            aiText = await callGemini(apiKey, nama, hubungan, tema, panjang, cerita, pengirim, true);
+            parts = parseAndValidateParts(aiText);
         }
+        
+        // Final fallback: fill missing parts with smart defaults
+        parts = ensureSixParts(parts || [], nama, tema);
+        
+        // Reconstruct text from parts (clean format)
+        const cleanText = parts.join('\n---\n');
 
         // Encode message to URL (compress with base64)
-        const encodedMsg = encodeMessage(aiText);
+        const encodedMsg = encodeMessage(cleanText);
 
         // Counter
         let counter = parseInt(localStorage.getItem('msg_count') || '0') + 1;
@@ -150,6 +159,70 @@ function encodeMessage(text) {
     return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
+// Parse AI output and extract 6 parts robustly
+function parseAndValidateParts(text) {
+    if (!text) return null;
+    
+    // Try splitting by "---" first
+    let parts = text.split(/\n?\s*---\s*\n?/).map(p => p.trim()).filter(p => p.length > 5);
+    
+    // If still not 6, try numbered format [1] [2] etc
+    if (parts.length < 6) {
+        const numbered = text.split(/\n?\s*\[(?:\d+|BAGIAN\s*\d+)\]\s*\n?/i).map(p => p.trim()).filter(p => p.length > 5);
+        if (numbered.length >= 6) parts = numbered;
+    }
+    
+    // Try splitting by "BAGIAN X:" or just numbers like "1." "2."
+    if (parts.length < 6) {
+        const byBagian = text.split(/\n?\s*(?:BAGIAN\s*\d+[:\.\)]?|^\d+[\.\)])\s*\n?/im).map(p => p.trim()).filter(p => p.length > 5);
+        if (byBagian.length >= 6) parts = byBagian;
+    }
+    
+    // Clean each part - remove leading numbers, labels
+    parts = parts.map(p => {
+        return p.replace(/^(BAGIAN\s*\d+[:\.\)]?\s*[-–]?\s*[A-Z\s]*\s*[:\.\)]?)/i, '')
+                .replace(/^\[\d+\][\s:]*/g, '')
+                .replace(/^\d+[\.\)]\s*/g, '')
+                .replace(/^[-=]+/g, '')
+                .trim();
+    }).filter(p => p.length > 5);
+    
+    return parts;
+}
+
+// Smart fallback for missing parts
+function ensureSixParts(parts, nama, tema) {
+    const fallbacks = [
+        // Bagian 1 - Greeting
+        [`Untukmu, ${nama}, yang selalu kucintai dalam diam.`,
+         `${nama}ku, izinkan aku jujur sekali ini saja.`,
+         `Diam-diam aku menulis ini sambil tersenyum, ${nama}.`,
+         `Sebelum kamu tutup ini, baca dulu sampai habis ya, ${nama}.`],
+        // Bagian 2 - Teaser
+        [`Aku punya satu rahasia yang gak pernah aku bilang ke siapa-siapa.`,
+         `Sebenarnya pesan ini sudah aku tulis berkali-kali di kepala.`,
+         `Ada hal yang udah lama aku pendam, dan hari ini aku mau ungkapkan.`,
+         `Aku ingin kamu tahu sesuatu yang selama ini cuma aku simpan sendiri.`],
+        // Bagian 3 - Main 1
+        [`${nama}, kamu adalah orang yang membuat hari-hariku terasa berbeda. Setiap kali aku memikirkanmu, ada perasaan hangat yang menyelinap masuk ke hati. Kamu bukan sekadar nama yang aku panggil, tapi seseorang yang kehadirannya kuingin selalu ada. Dalam keramaian dunia ini, kamulah yang paling kucari, paling kunanti, dan paling kurindu.`],
+        // Bagian 4 - Main 2
+        [`Yang membuat aku jatuh cinta padamu bukan hanya satu hal, melainkan ribuan detail kecil yang menjadi kamu. Caramu tertawa, caramu menatap, bahkan caramu diam pun terasa istimewa di mataku. Kamu adalah kombinasi yang sempurna dari semua hal yang selama ini aku impikan. Setiap detik bersamamu, ${nama}, terasa seperti hadiah yang tidak pernah ingin aku akhiri.`],
+        // Bagian 5 - Promise
+        [`Aku berjanji akan selalu ada untukmu, dalam tawa maupun dalam tangisan. Aku akan menjadi rumah yang nyaman untukmu pulang, ${nama}. Apapun yang terjadi nanti, ingatlah bahwa cintaku padamu tidak akan pernah pudar oleh waktu.`],
+        // Bagian 6 - Closing
+        [`Kamu adalah halaman terindah dalam buku hidupku. Terima kasih telah menjadi alasan aku bersyukur setiap hari. ${nama}, aku mencintaimu, kemarin, hari ini, dan selamanya.`]
+    ];
+    
+    const result = [...parts];
+    for (let i = 0; i < 6; i++) {
+        if (!result[i] || result[i].length < 10) {
+            const options = fallbacks[i];
+            result[i] = options[Math.floor(Math.random() * options.length)];
+        }
+    }
+    return result.slice(0, 6);
+}
+
 // Regenerate (panggil AI lagi dengan input yang sama)
 async function regenerateMessage() {
     document.getElementById('result').classList.add('hidden');
@@ -158,7 +231,7 @@ async function regenerateMessage() {
 
 
 // ============= CALL GEMINI API =============
-async function callGemini(apiKey, nama, hubungan, tema, panjang, cerita, dari) {
+async function callGemini(apiKey, nama, hubungan, tema, panjang, cerita, dari, strict = false) {
     const models = ['gemini-3.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
     const hubunganText = {
@@ -186,77 +259,54 @@ async function callGemini(apiKey, nama, hubungan, tema, panjang, cerita, dari) {
         'ldr': 'LDR. Tentang jarak yang memisahkan tapi cinta mendekatkan. Menunggu, video call, rindu, mimpi bertemu.'
     };
 
-    const panjangSpec = {
-        'sedang': { kata: '350', ksb: '5-7 kalimat', tokens: 2500 },
-        'panjang': { kata: '600', ksb: '7-9 kalimat', tokens: 4000 },
-        'sangat_panjang': { kata: '900', ksb: '9-12 kalimat', tokens: 6000 }
-    };
-    const spec = panjangSpec[panjang] || panjangSpec['panjang'];
+    const ceritaContext = cerita ? `\n\nKONTEKS PERSONAL TENTANG ${nama.toUpperCase()}:\n"${cerita}"\n\nIntegrasikan info ini SECARA NATURAL.` : '';
 
-    const bumbuList = [
-        'Selipkan metafora kreatif tentang kopi/hujan/senja.',
-        'Tambahkan kalimat "andai..." yang romantis.',
-        'Buat plot twist kecil yang manis di tengah pesan.',
-        'Selipkan referensi sehari-hari romantis (mie ayam, ngopi, hujan).',
-        'Tambahkan pertanyaan retoris puitis ("Tahukah kamu...?").',
-        'Selipkan satu kata bahasa daerah/asing romantis.',
-        'Buat kalimat singkat tapi powerful (3-5 kata) di tengah.',
-        'Tambahkan janji konkret yang spesifik dan unik.',
-        'Selipkan kalimat tentang detik dan waktu yang puitis.',
-        'Buat momen "aku ingin..." yang detail dan menyentuh.',
-        'Selipkan pengakuan kecil yang gak biasa diceritakan.',
-        'Buat satu kalimat yang bermain dengan kata-kata (wordplay).'
-    ];
-    const shuffled = [...bumbuList].sort(() => 0.5 - Math.random());
-    const bumbus = shuffled.slice(0, 3);
-
-    const ceritaContext = cerita ? `\n\nKONTEKS PERSONAL TENTANG ${nama.toUpperCase()}:\n"${cerita}"\n\nIntegrasikan info ini SECARA NATURAL ke pesan. Pilih yang paling menyentuh.` : '';
-
-    const prompt = `Kamu adalah Pujangga Cinta Indonesia. Karyamu sering viral di TikTok dan IG karena selalu BIKIN BAPER MAKSIMAL.
-
-TUGAS: Tulis pesan cinta untuk "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} dari saya${dari ? ` (pengirim: "${dari}")` : ''}.
+    // STRICT prompt with explicit numbered format
+    const prompt = `Kamu adalah Pujangga Cinta Indonesia yang sangat patuh format. Tulis pesan cinta untuk "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} dari saya${dari ? ` (pengirim: "${dari}")` : ''}.
 
 GAYA: ${temaPrompt[tema] || temaPrompt['romantis']}
-
-BUMBU KREATIF (WAJIB diintegrasikan natural):
-1. ${bumbus[0]}
-2. ${bumbus[1]}
-3. ${bumbus[2]}
 ${ceritaContext}
 
 ============================================
-FORMAT OUTPUT - WAJIB 6 BAGIAN, dipisah "---" di baris kosong:
+FORMAT OUTPUT WAJIB (SANGAT KETAT - HARUS PERSIS BEGINI):
 
-BAGIAN 1 - GREETING (1 kalimat singkat 5-15 kata):
-Sapaan UNIK & KREATIF untuk "${nama}". JANGAN tulis "Hai ${nama}". Buat yang BEDA setiap kali.
-Contoh: "Sebelum kamu tutup ini, baca dulu sampai habis ya, ${nama}." atau "${nama}ku, izinkan aku jujur..."
+Tulis 6 bagian. SETIAP bagian DIMULAI dengan "[1]", "[2]", "[3]", "[4]", "[5]", "[6]" di awal baris baru.
+Antara bagian, beri 1 baris kosong.
 
-BAGIAN 2 - TEASER (1-2 kalimat, 15-30 kata):
-Bikin penasaran. JANGAN pakai "Kamu tau gak sih?". Variasikan!
-Contoh: "Aku punya satu rahasia yang gak pernah aku bilang ke siapa-siapa." atau "Sebenarnya pesan ini sudah aku tulis berkali-kali di kepala."
+[1]
+Tulis disini: SAPAAN UNIK (1 kalimat singkat 5-15 kata) untuk "${nama}". JANGAN tulis "Hai ${nama}". Buat kreatif.
+Contoh bagus: "Sebelum kamu tutup ini, baca dulu sampai habis ya, ${nama}."
 
-BAGIAN 3 - PEMBUKA UTAMA (${spec.ksb}):
-Ungkapan cinta yang dalam. Sebut nama "${nama}". Kalimat pertama harus MEMORABLE.
+[2]
+Tulis disini: TEASER (1-2 kalimat singkat, 15-30 kata) yang bikin penasaran. JANGAN pakai "Kamu tau gak sih?".
+Contoh bagus: "Aku punya satu rahasia yang gak pernah aku bilang ke siapa-siapa."
 
-BAGIAN 4 - DETAIL & ALASAN (${spec.ksb}):
-Hal SPESIFIK yang bikin jatuh cinta. Detail personal: senyum, tatapan, kebiasaan kecil. Buat seolah benar-benar mengenal dia.
+[3]
+Tulis disini: PEMBUKA UTAMA (sekitar 100-150 kata, 5-7 kalimat). Ungkapan cinta yang dalam. Sebut "${nama}". Kalimat pertama harus MEMORABLE. Buat panjang dan bermakna.
 
-BAGIAN 5 - JANJI & HARAPAN (${spec.ksb}):
-Komitmen, janji, harapan masa depan. Spesifik dan tulus.
+[4]
+Tulis disini: DETAIL & ALASAN (sekitar 100-150 kata, 5-7 kalimat). Hal SPESIFIK yang bikin jatuh cinta. Detail personal: senyum, tatapan, kebiasaan kecil. Buat seolah benar-benar mengenal dia.
 
-BAGIAN 6 - PENUTUP KILLER (4-6 kalimat):
-Penutup yang akan diingat selamanya. Sangat memorable.
+[5]
+Tulis disini: JANJI & HARAPAN (sekitar 80-120 kata, 4-5 kalimat). Komitmen, janji, harapan masa depan. Spesifik dan tulus.
+
+[6]
+Tulis disini: PENUTUP KILLER (sekitar 50-80 kata, 3-4 kalimat). Penutup yang akan diingat selamanya. Sangat memorable.
 
 ============================================
-ATURAN KETAT:
-- TEPAT 6 bagian dipisah "---" di baris kosong
-- Total minimal ${spec.kata} kata
-- Bahasa Indonesia natural
-- TANPA emoji, markdown, label "Bagian X:"
-- Variatif - tiap generate harus berbeda
-- Sebut "${nama}" minimal 3x
+ATURAN MUTLAK:
+1. WAJIB ada 6 bagian dengan label [1], [2], [3], [4], [5], [6]
+2. JANGAN skip bagian apapun
+3. Setiap bagian HARUS terisi dengan teks (jangan kosong)
+4. TANPA emoji, TANPA markdown (**, ##, -)
+5. JANGAN tulis kata "Bagian" atau judul lain di output
+6. Bahasa Indonesia natural & mengalir
+7. Total sekitar 500-700 kata
+8. Sebut "${nama}" minimal 3x
 
-Sekarang TULIS PESANNYA. Buat paling bikin meleleh:`;
+${strict ? 'PENTING: Generate sebelumnya gagal mengikuti format. KALI INI WAJIB IKUTI FORMAT [1] sampai [6] dengan PERSIS!' : ''}
+
+Sekarang TULIS PESANNYA dengan format yang benar:`;
 
     let lastError = '';
     for (const model of models) {
@@ -268,7 +318,8 @@ Sekarang TULIS PESANNYA. Buat paling bikin meleleh:`;
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
-                        temperature: 1.2, maxOutputTokens: spec.tokens,
+                        temperature: strict ? 0.9 : 1.1,
+                        maxOutputTokens: 3000,
                         topP: 0.95, topK: 40
                     }
                 })

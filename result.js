@@ -147,6 +147,51 @@ function decodeMessage(encoded) {
     }
 }
 
+// Robust parse - try multiple formats
+function parseAndValidateParts(text) {
+    if (!text) return null;
+    let parts = text.split(/\n?\s*---\s*\n?/).map(p => p.trim()).filter(p => p.length > 5);
+    if (parts.length < 6) {
+        const numbered = text.split(/\n?\s*\[(?:\d+|BAGIAN\s*\d+)\]\s*\n?/i).map(p => p.trim()).filter(p => p.length > 5);
+        if (numbered.length >= 6) parts = numbered;
+    }
+    if (parts.length < 6) {
+        const byBagian = text.split(/\n?\s*(?:BAGIAN\s*\d+[:\.\)]?|^\d+[\.\)])\s*\n?/im).map(p => p.trim()).filter(p => p.length > 5);
+        if (byBagian.length >= 6) parts = byBagian;
+    }
+    parts = parts.map(p => {
+        return p.replace(/^(BAGIAN\s*\d+[:\.\)]?\s*[-–]?\s*[A-Z\s]*\s*[:\.\)]?)/i, '')
+                .replace(/^\[\d+\][\s:]*/g, '')
+                .replace(/^\d+[\.\)]\s*/g, '')
+                .replace(/^[-=]+/g, '')
+                .trim();
+    }).filter(p => p.length > 5);
+    return parts;
+}
+
+function ensureSixParts(parts, namaArg) {
+    const fallbacks = [
+        [`Untukmu, ${namaArg}, yang selalu kucintai dalam diam.`,
+         `${namaArg}ku, izinkan aku jujur sekali ini saja.`,
+         `Diam-diam aku menulis ini sambil tersenyum, ${namaArg}.`],
+        [`Aku punya satu rahasia yang gak pernah aku bilang ke siapa-siapa.`,
+         `Sebenarnya pesan ini sudah aku tulis berkali-kali di kepala.`,
+         `Ada hal yang udah lama aku pendam, dan hari ini aku mau ungkapkan.`],
+        [`${namaArg}, kamu adalah orang yang membuat hari-hariku terasa berbeda. Setiap kali aku memikirkanmu, ada perasaan hangat yang menyelinap masuk ke hati. Kamu bukan sekadar nama yang aku panggil, tapi seseorang yang kehadirannya kuingin selalu ada. Dalam keramaian dunia ini, kamulah yang paling kucari, paling kunanti, dan paling kurindu.`],
+        [`Yang membuat aku jatuh cinta padamu bukan hanya satu hal, melainkan ribuan detail kecil yang menjadi kamu. Caramu tertawa, caramu menatap, bahkan caramu diam pun terasa istimewa di mataku. Kamu adalah kombinasi yang sempurna dari semua hal yang selama ini aku impikan. Setiap detik bersamamu, ${namaArg}, terasa seperti hadiah yang tidak pernah ingin aku akhiri.`],
+        [`Aku berjanji akan selalu ada untukmu, dalam tawa maupun dalam tangisan. Aku akan menjadi rumah yang nyaman untukmu pulang, ${namaArg}. Apapun yang terjadi nanti, ingatlah bahwa cintaku padamu tidak akan pernah pudar oleh waktu.`],
+        [`Kamu adalah halaman terindah dalam buku hidupku. Terima kasih telah menjadi alasan aku bersyukur setiap hari. ${namaArg}, aku mencintaimu, kemarin, hari ini, dan selamanya.`]
+    ];
+    const result = [...parts];
+    for (let i = 0; i < 6; i++) {
+        if (!result[i] || result[i].length < 10) {
+            const options = fallbacks[i];
+            result[i] = options[Math.floor(Math.random() * options.length)];
+        }
+    }
+    return result.slice(0, 6);
+}
+
 let aiResultParts = null;
 let currentSlide = 0;
 const totalSlides = 6;
@@ -164,7 +209,9 @@ function loadMessage() {
         return;
     }
 
-    const parts = text.split('---').map(p => p.trim()).filter(p => p.length > 0);
+    // Robust parse + ensure 6 parts (with fallback for missing)
+    let parts = parseAndValidateParts(text) || [];
+    parts = ensureSixParts(parts, nama || 'Sayang');
     aiResultParts = parts;
 
     // Slide 1: AI Greeting
