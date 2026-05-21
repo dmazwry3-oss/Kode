@@ -39,6 +39,7 @@ const nama = urlParams.get('nama');
 const hubungan = urlParams.get('hubungan');
 const apiKey = urlParams.get('key');
 const dari = urlParams.get('dari');
+const tema = urlParams.get('tema') || 'romantis';
 
 // Set names
 const namaSlide1 = document.getElementById('namaSlide1');
@@ -59,22 +60,17 @@ function nextSlide() {
     
     if (currentSlide >= totalSlides - 1) return;
     
-    // Hide current
     slides[currentSlide].classList.remove('active');
     slides[currentSlide].classList.add('exit-left');
     
     currentSlide++;
     
-    // Show next
     setTimeout(() => {
         slides[currentSlide - 1].classList.remove('exit-left');
         slides[currentSlide].classList.add('active');
-        
-        // Update dots
         dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
     }, 300);
 
-    // Generate message when reaching slide 3
     if (currentSlide === 2) {
         generateRomanticMessage();
     }
@@ -83,16 +79,14 @@ function nextSlide() {
 function showError(msg) {
     const slides = document.querySelectorAll('.slide');
     slides[currentSlide].classList.remove('active');
-    
     const errSlide = document.getElementById('slideError');
     errSlide.style.display = '';
     errSlide.classList.add('active');
-    
     const errMsg = document.getElementById('errorMessage');
     if (errMsg) errMsg.textContent = msg;
 }
 
-// Generate message using Gemini AI
+// Generate message
 async function generateRomanticMessage() {
     if (!nama || !hubungan || !apiKey) {
         showError('Link tidak lengkap. Pastikan link berisi nama, hubungan, dan API key.');
@@ -102,33 +96,36 @@ async function generateRomanticMessage() {
     const models = ['gemini-3.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
     const hubunganText = {
-        'pacar': 'pacar',
-        'suami': 'suami',
-        'istri': 'istri',
+        'pacar': 'pacar tercinta',
+        'suami': 'suami tersayang',
+        'istri': 'istri tercinta',
         'gebetan': 'gebetan (orang yang disukai)',
-        'mantan': 'mantan kekasih',
-        'sahabat': 'sahabat spesial',
+        'mantan': 'mantan yang masih dirindukan',
+        'sahabat': 'sahabat paling spesial',
         'crush': 'orang yang diam-diam disukai'
     };
 
-    const prompt = `Kamu adalah penulis pesan cinta yang sangat romantis dan bucin. Buatkan pesan cinta yang SANGAT PANJANG dan SANGAT ROMANTIS dalam bahasa Indonesia untuk seseorang bernama "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} saya${dari ? ` (dari ${dari})` : ''}.
+    const temaPrompt = {
+        'romantis': 'Gunakan gaya bahasa romantis klasik yang menyentuh hati, penuh cinta dan kelembutan.',
+        'bucin': 'Gunakan gaya bahasa bucin abis, lebay tapi manis, kekinian, yang bikin cringe tapi senang.',
+        'puitis': 'Gunakan gaya bahasa puitis yang sangat dalam, penuh metafora tentang cinta, bagai sajak indah.',
+        'lucu': 'Gunakan gaya bahasa romantis tapi diselingi humor yang bikin tersenyum dan tertawa.',
+        'rindu': 'Gunakan gaya bahasa tentang rindu yang mendalam, seolah sudah lama tidak bertemu.',
+        'malam': 'Gunakan gaya ucapan selamat malam yang romantis, hangat, dan bikin tidur nyenyak.'
+    };
 
-PENTING: Buat pesan yang dibagi menjadi TEPAT 4 bagian, dipisahkan dengan tanda "---". Setiap bagian harus cukup panjang (minimal 3-4 kalimat).
+    const prompt = `Kamu adalah penulis pesan cinta yang sangat berbakat. Buatkan pesan cinta dalam bahasa Indonesia untuk "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} saya${dari ? ` (pengirim: ${dari})` : ''}.
 
-Bagian 1: Ungkapan perasaan yang dalam dan puitis tentang betapa berartinya dia. Sebutkan nama "${nama}". Buat sangat menyentuh dan bikin baper.
+${temaPrompt[tema] || temaPrompt['romantis']}
 
-Bagian 2: Ceritakan hal-hal kecil yang membuat kamu jatuh cinta padanya. Buat detail dan romantic. Gunakan bahasa yang sangat manis dan bucin abis.
+PENTING: Buat TEPAT 4 bagian dipisahkan "---":
 
-Bagian 3: Janji-janji romantis untuk masa depan bersama. Buat yang bikin meleleh hatinya. Ungkapkan komitmen dan dedikasi.
+Bagian 1: Sapaan manis + ungkapan betapa berartinya dia (3-4 kalimat, sebutkan nama "${nama}")
+Bagian 2: Hal-hal yang membuatmu jatuh cinta/sayang padanya (3-4 kalimat, detail & manis)
+Bagian 3: Janji/harapan untuk masa depan (2-3 kalimat yang powerful)
+Bagian 4: Penutup yang bikin baper (1-2 kalimat memorable)
 
-Bagian 4: Penutup yang sangat romantis dan bikin nangis bahagia. Buat singkat tapi powerful. Akhiri dengan kalimat cinta yang memorable.
-
-ATURAN:
-- Bahasa Indonesia puitis dan romantis
-- Tanpa markdown/bullet/emoji
-- Pisahkan 4 bagian dengan "---"
-- Setiap bagian 2-3 kalimat yang powerful
-- Se-bucin mungkin`;
+ATURAN: Bahasa Indonesia, tanpa markdown/bullet/emoji, pisahkan dengan "---" saja.`;
 
     let lastError = '';
 
@@ -141,7 +138,7 @@ ATURAN:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 1.0, maxOutputTokens: 800 }
+                    generationConfig: { temperature: 1.0, maxOutputTokens: 700 }
                 })
             });
 
@@ -171,7 +168,6 @@ ATURAN:
 }
 
 function displayMessages(fullText) {
-    // Split by --- separator
     const parts = fullText.split('---').map(p => p.trim()).filter(p => p.length > 0);
     
     const p1 = document.getElementById('messageP1');
@@ -181,14 +177,12 @@ function displayMessages(fullText) {
     const loading = document.getElementById('loadingSlide3');
     const nextBtn3 = document.getElementById('nextBtn3');
 
-    // Hide loading, show message with typing effect
     if (loading) loading.style.display = 'none';
     
-    typeWriter(p1, parts[0] || 'Kamu adalah alasan kenapa aku tersenyum setiap hari...').then(() => {
+    typeWriter(p1, parts[0] || 'Kamu adalah alasan aku tersenyum setiap hari...').then(() => {
         if (nextBtn3) nextBtn3.style.display = '';
     });
     
-    // Set other parts immediately (they'll be revealed on slide)
     if (p2) p2.textContent = parts[1] || 'Setiap detik bersamamu terasa begitu berharga...';
     if (p3) p3.textContent = parts[2] || 'Aku berjanji akan selalu ada untukmu...';
     if (p4) p4.textContent = parts[3] || 'Kamu segalanya bagiku, selamanya.';
@@ -204,23 +198,10 @@ async function typeWriter(element, text) {
     }
 }
 
-// Swipe support for mobile
+// Swipe support
 let touchStartX = 0;
-let touchEndX = 0;
-
-document.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
-});
-
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
 document.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (diff > 50) nextSlide();
 });
-
-function handleSwipe() {
-    const diff = touchStartX - touchEndX;
-    if (diff > 50) {
-        // Swipe left = next
-        nextSlide();
-    }
-}
