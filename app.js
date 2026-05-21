@@ -140,11 +140,33 @@ async function generateLink() {
         // Show regenerate button
         document.getElementById('regenerateBtn').style.display = '';
 
-        // Save to link history
-        saveLinkToHistory(nama, link, tema);
+        // Try to shorten URL (gratis, tanpa API key)
+        showToast('🔗 Memendekkan link...');
+        const shortLink = await shortenUrl(link);
+        const finalLink = shortLink || link;
+        
+        // Update display with short link if available
+        linkEl.href = finalLink;
+        linkEl.textContent = finalLink;
+        
+        // Show "lihat link lengkap" toggle if shortened
+        const toggleLong = document.getElementById('toggleLongLink');
+        if (toggleLong) {
+            if (shortLink && shortLink !== link) {
+                toggleLong.style.display = '';
+                toggleLong.dataset.longLink = link;
+                toggleLong.dataset.shortLink = shortLink;
+                toggleLong.textContent = '🔍 Lihat link lengkap';
+            } else {
+                toggleLong.style.display = 'none';
+            }
+        }
+
+        // Save to link history (save short link if available)
+        saveLinkToHistory(nama, finalLink, tema);
 
         setTimeout(() => resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-        showToast('🎉 Pesan jadi! Link siap dibagikan');
+        showToast(shortLink ? '🎉 Link pendek siap dibagikan!' : '🎉 Pesan jadi! Link siap dibagikan');
     } catch (err) {
         showToast('❌ Error: ' + err.message);
     } finally {
@@ -375,6 +397,72 @@ function shareLink() {
 function previewLink() {
     const link = document.getElementById('generatedLink').href;
     window.open(link, '_blank');
+}
+
+
+// ============= URL SHORTENER (gratis, tanpa API key) =============
+async function shortenUrl(longUrl) {
+    // Try multiple services as fallback
+    const services = [
+        // is.gd - paling reliable untuk CORS
+        async (url) => {
+            const r = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`);
+            if (!r.ok) throw new Error('is.gd failed');
+            const t = await r.text();
+            if (!t.startsWith('http')) throw new Error('Invalid response');
+            return t.trim();
+        },
+        // da.gd - alternative
+        async (url) => {
+            const r = await fetch(`https://da.gd/s?url=${encodeURIComponent(url)}`);
+            if (!r.ok) throw new Error('da.gd failed');
+            const t = await r.text();
+            if (!t.startsWith('http')) throw new Error('Invalid response');
+            return t.trim();
+        },
+        // TinyURL - last resort
+        async (url) => {
+            const r = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+            if (!r.ok) throw new Error('tinyurl failed');
+            const t = await r.text();
+            if (!t.startsWith('http')) throw new Error('Invalid response');
+            return t.trim();
+        }
+    ];
+    
+    for (const svc of services) {
+        try {
+            const result = await Promise.race([
+                svc(longUrl),
+                new Promise((_, reject) => setTimeout(() => reject('timeout'), 5000))
+            ]);
+            if (result && result.startsWith('http')) {
+                return result;
+            }
+        } catch (e) {
+            console.warn('Shortener failed:', e);
+            continue;
+        }
+    }
+    return null; // All failed, fallback to long URL
+}
+
+function toggleLongLink() {
+    const btn = document.getElementById('toggleLongLink');
+    const linkEl = document.getElementById('generatedLink');
+    if (!btn || !linkEl) return;
+    
+    if (linkEl.textContent === btn.dataset.shortLink) {
+        // Currently showing short, switch to long
+        linkEl.href = btn.dataset.longLink;
+        linkEl.textContent = btn.dataset.longLink;
+        btn.textContent = '🔗 Tampilkan link pendek';
+    } else {
+        // Switch back to short
+        linkEl.href = btn.dataset.shortLink;
+        linkEl.textContent = btn.dataset.shortLink;
+        btn.textContent = '🔍 Lihat link lengkap';
+    }
 }
 
 
