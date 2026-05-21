@@ -124,12 +124,11 @@ Bagian 3: Janji-janji romantis untuk masa depan bersama. Buat yang bikin meleleh
 Bagian 4: Penutup yang sangat romantis dan bikin nangis bahagia. Buat singkat tapi powerful. Akhiri dengan kalimat cinta yang memorable.
 
 ATURAN:
-- Gunakan bahasa Indonesia yang puitis dan sangat romantis
-- Jangan gunakan markdown, bullet, atau format khusus
-- Jangan gunakan emoji
-- Pisahkan 4 bagian dengan tanda "---" saja
-- Setiap bagian minimal 3-4 kalimat, buat PANJANG dan DETAIL
-- Buat se-bucin mungkin, yang bikin baper maksimal`;
+- Bahasa Indonesia puitis dan romantis
+- Tanpa markdown/bullet/emoji
+- Pisahkan 4 bagian dengan "---"
+- Setiap bagian 2-3 kalimat yang powerful
+- Se-bucin mungkin`;
 
     let lastError = '';
 
@@ -142,7 +141,7 @@ ATURAN:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 1.0, maxOutputTokens: 1500 }
+                    generationConfig: { temperature: 1.0, maxOutputTokens: 800 }
                 })
             });
 
@@ -201,7 +200,7 @@ async function typeWriter(element, text) {
     const chars = text.split('');
     for (let i = 0; i < chars.length; i++) {
         element.textContent += chars[i];
-        await new Promise(r => setTimeout(r, 18));
+        await new Promise(r => setTimeout(r, 8));
     }
 }
 
