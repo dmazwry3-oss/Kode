@@ -12,15 +12,23 @@ async function generateRomanticMessage() {
     const loading = document.getElementById('loading');
     const messageContainer = document.getElementById('messageContainer');
     const errorContainer = document.getElementById('errorContainer');
+    const errorMessage = document.getElementById('errorMessage');
     const romanticMessage = document.getElementById('romanticMessage');
 
     if (!nama || !hubungan || !apiKey) {
         loading.classList.add('hidden');
+        if (errorMessage) errorMessage.textContent = 'Link tidak lengkap. Pastikan link berisi nama, hubungan, dan API key.';
         errorContainer.classList.remove('hidden');
         return;
     }
 
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    // Try multiple model names in case one doesn't work
+    const models = [
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-pro'
+    ];
 
     const hubunganText = {
         'pacar': 'pacar',
@@ -40,49 +48,67 @@ Buatkan dalam format:
 
 Gunakan bahasa yang puitis, romantis, dan menyentuh hati. Jangan gunakan markdown atau format khusus, cukup teks biasa. Jangan tambahkan emoji. Langsung tulis kata-katanya saja tanpa judul.`;
 
-    try {
-        const response = await fetch(GEMINI_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: prompt
-                            }
-                        ]
-                    }
-                ],
-                generationConfig: {
-                    temperature: 0.9,
-                    maxOutputTokens: 500
-                }
-            })
-        });
+    let lastError = '';
 
-        if (!response.ok) {
-            throw new Error('API request failed: ' + response.status);
-        }
-
-        const data = await response.json();
-        
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            const text = data.candidates[0].content.parts[0].text;
-            romanticMessage.textContent = text;
+    for (const model of models) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             
-            loading.classList.add('hidden');
-            messageContainer.classList.remove('hidden');
-        } else {
-            throw new Error('Invalid response format');
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: prompt
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0.9,
+                        maxOutputTokens: 500
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                lastError = `Model ${model}: ${response.status} - ${errData.error?.message || 'Unknown error'}`;
+                console.warn(lastError);
+                continue; // Try next model
+            }
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                const text = data.candidates[0].content.parts[0].text;
+                romanticMessage.textContent = text;
+                
+                loading.classList.add('hidden');
+                messageContainer.classList.remove('hidden');
+                return; // Success!
+            } else {
+                lastError = `Model ${model}: Response tidak valid`;
+                continue;
+            }
+        } catch (error) {
+            lastError = `Model ${model}: ${error.message}`;
+            console.error(lastError);
+            continue;
         }
-    } catch (error) {
-        console.error('Error:', error);
-        loading.classList.add('hidden');
-        errorContainer.classList.remove('hidden');
     }
+
+    // All models failed
+    loading.classList.add('hidden');
+    if (errorMessage) {
+        errorMessage.textContent = `Gagal memuat pesan cinta. Error: ${lastError}`;
+    }
+    errorContainer.classList.remove('hidden');
 }
 
 // Start generating when page loads
