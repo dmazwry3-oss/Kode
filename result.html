@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesan Cinta Untukmu</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body class="result-page">
+    <div class="container">
+        <div class="hearts-bg">
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+        </div>
+        
+        <div class="card result-card">
+            <div class="sticker-top">
+                <span class="big-emoji">&#128149;</span>
+                <span class="big-emoji">&#128144;</span>
+                <span class="big-emoji">&#128149;</span>
+            </div>
+            
+            <h1 class="title">Untukmu, <span id="namaTarget"></span></h1>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Sedang menulis kata-kata cinta...</p>
+            </div>
+            
+            <div id="messageContainer" class="message-container hidden">
+                <div class="quote-box">
+                    <span class="quote-mark">&ldquo;</span>
+                    <p id="romanticMessage" class="romantic-message"></p>
+                    <span class="quote-mark">&rdquo;</span>
+                </div>
+                
+                <div class="stickers">
+                    <span class="sticker">&#128152;</span>
+                    <span class="sticker">&#128147;</span>
+                    <span class="sticker">&#129392;</span>
+                    <span class="sticker">&#128148;</span>
+                    <span class="sticker">&#128155;</span>
+                    <span class="sticker">&#128150;</span>
+                </div>
+                
+                <div class="footer-message">
+                    <p>Dengan cinta, dari seseorang yang menyayangimu</p>
+                    <div class="footer-stickers">
+                        <span>&#127801;</span>
+                        <span>&#10024;</span>
+                        <span>&#128139;</span>
+                        <span>&#10024;</span>
+                        <span>&#127801;</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="errorContainer" class="error-container hidden">
+                <p>Oops! Gagal memuat pesan cinta. Coba refresh halaman ya.</p>
+                <button onclick="location.reload()">Coba Lagi</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="result.js"></script>
+</body>
+</html>

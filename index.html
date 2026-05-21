@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bucin Romantis - Generator Kata Cinta</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="hearts-bg">
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+            <span class="heart">&#10084;</span>
+        </div>
+        
+        <div class="card">
+            <h1 class="title">Bucin Romantis</h1>
+            <p class="subtitle">Buat kata-kata cinta spesial untuk orang tersayang</p>
+            
+            <div class="form-group">
+                <label for="nama">Nama Pasangan</label>
+                <input type="text" id="nama" placeholder="Masukkan nama dia..." />
+            </div>
+            
+            <div class="form-group">
+                <label for="hubungan">Hubungan</label>
+                <select id="hubungan">
+                    <option value="">-- Pilih Hubungan --</option>
+                    <option value="pacar">Pacar</option>
+                    <option value="suami">Suami</option>
+                    <option value="istri">Istri</option>
+                    <option value="gebetan">Gebetan</option>
+                    <option value="mantan">Mantan</option>
+                    <option value="sahabat">Sahabat Spesial</option>
+                </select>
+            </div>
+            
+            <button id="generateBtn" onclick="generateLink()">
+                <span class="btn-icon">&#10084;</span> Buat Link Romantis
+            </button>
+            
+            <div id="result" class="result hidden">
+                <p class="result-text">Link spesial untuk <strong id="resultNama"></strong>:</p>
+                <div class="link-box">
+                    <a id="generatedLink" href="#" target="_blank"></a>
+                    <button class="copy-btn" onclick="copyLink()">Salin</button>
+                </div>
+                <p id="copyNotif" class="copy-notif hidden">Link berhasil disalin!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
