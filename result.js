@@ -365,3 +365,345 @@ document.addEventListener('keydown', e => {
 
 // Load message immediately on page load
 loadMessage();
+
+
+
+
+// ============= BACKGROUND MUSIC (Web Audio Generated Lo-fi) =============
+let musicCtx = null;
+let musicPlaying = false;
+let musicNodes = [];
+let musicTimers = [];
+
+function startMusic() {
+    if (musicPlaying) return;
+    try {
+        musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { return; }
+
+    musicPlaying = true;
+    document.getElementById('musicBtn').textContent = '🎶';
+
+    // Romantic chord progression (in Hz)
+    // C major7 - A minor7 - F major7 - G major7 (very romantic feel)
+    const chords = [
+        [261.63, 329.63, 392.00, 493.88], // Cmaj7
+        [220.00, 261.63, 329.63, 415.30], // Am7
+        [174.61, 220.00, 261.63, 329.63], // Fmaj7
+        [196.00, 246.94, 293.66, 369.99]  // Gmaj7
+    ];
+
+    let chordIdx = 0;
+    const chordDuration = 4; // seconds per chord
+
+    function playChord() {
+        if (!musicPlaying) return;
+        const chord = chords[chordIdx];
+        const now = musicCtx.currentTime;
+
+        chord.forEach((freq, i) => {
+            const osc = musicCtx.createOscillator();
+            const gain = musicCtx.createGain();
+            const filter = musicCtx.createBiquadFilter();
+            
+            osc.type = 'triangle';
+            osc.frequency.value = freq * (i === 0 ? 0.5 : 1); // bass note octave down
+            
+            filter.type = 'lowpass';
+            filter.frequency.value = 800;
+            filter.Q.value = 1;
+            
+            // Soft envelope
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.04, now + 0.5);
+            gain.gain.linearRampToValueAtTime(0.03, now + chordDuration - 0.5);
+            gain.gain.linearRampToValueAtTime(0, now + chordDuration);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(musicCtx.destination);
+            
+            osc.start(now);
+            osc.stop(now + chordDuration);
+            musicNodes.push(osc);
+        });
+
+        // Sparkle melody on top occasionally
+        if (Math.random() > 0.4) {
+            const melodyNotes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+            for (let i = 0; i < 3; i++) {
+                const t = now + Math.random() * chordDuration;
+                const note = melodyNotes[Math.floor(Math.random() * melodyNotes.length)];
+                const osc = musicCtx.createOscillator();
+                const gain = musicCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = note;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.02, t + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc.connect(gain);
+                gain.connect(musicCtx.destination);
+                osc.start(t);
+                osc.stop(t + 0.5);
+            }
+        }
+
+        chordIdx = (chordIdx + 1) % chords.length;
+        const timer = setTimeout(playChord, chordDuration * 1000);
+        musicTimers.push(timer);
+    }
+    playChord();
+}
+
+function stopMusic() {
+    musicPlaying = false;
+    musicTimers.forEach(t => clearTimeout(t));
+    musicTimers = [];
+    if (musicCtx) {
+        try { musicCtx.close(); } catch (e) {}
+        musicCtx = null;
+    }
+    document.getElementById('musicBtn').textContent = '🎵';
+}
+
+function toggleMusic() {
+    if (musicPlaying) stopMusic();
+    else startMusic();
+}
+
+// ============= READ ALOUD (Browser Speech Synthesis) =============
+let speakingNow = false;
+function readAloud() {
+    if (!aiResultParts) { showToast('⏳ Pesan belum dimuat'); return; }
+    
+    if (speakingNow) {
+        window.speechSynthesis.cancel();
+        speakingNow = false;
+        document.getElementById('readBtn').textContent = '🔉';
+        return;
+    }
+    
+    if (!('speechSynthesis' in window)) {
+        showToast('❌ Browser tidak mendukung suara');
+        return;
+    }
+
+    const fullText = aiResultParts.join('. ');
+    const utterance = new SpeechSynthesisUtterance(fullText);
+    
+    // Try to use Indonesian voice
+    const voices = window.speechSynthesis.getVoices();
+    const idVoice = voices.find(v => v.lang.startsWith('id'));
+    if (idVoice) utterance.voice = idVoice;
+    utterance.lang = 'id-ID';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.1;
+    
+    utterance.onend = () => {
+        speakingNow = false;
+        document.getElementById('readBtn').textContent = '🔉';
+    };
+    
+    speakingNow = true;
+    document.getElementById('readBtn').textContent = '⏸';
+    showToast('🔉 Membaca pesan...');
+    window.speechSynthesis.speak(utterance);
+}
+
+// ============= READING MODE =============
+function toggleReadingMode() {
+    const overlay = document.getElementById('readingOverlay');
+    if (overlay.classList.contains('hidden')) {
+        // Populate
+        document.getElementById('readingNama').textContent = nama || 'Sayang';
+        const body = document.getElementById('readingBody');
+        if (aiResultParts) {
+            body.innerHTML = aiResultParts.map((p, i) => 
+                `<p class="reading-paragraph${i < 2 ? ' reading-intro' : ''}">${p}</p>`
+            ).join('');
+        }
+        const footer = document.getElementById('readingFooter');
+        footer.innerHTML = dari ? `<p class="reading-from">— ${dari}</p>` : '';
+        overlay.classList.remove('hidden');
+    } else {
+        overlay.classList.add('hidden');
+    }
+}
+
+// ============= SAVE AS IMAGE (Canvas) =============
+function saveAsImage() {
+    if (!aiResultParts) { showToast('⏳ Pesan belum dimuat'); return; }
+    
+    showToast('📷 Membuat gambar...');
+    const canvas = document.getElementById('imageCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = 1080;
+    canvas.height = 1920;
+    
+    // Gradient background
+    const grad = ctx.createLinearGradient(0, 0, 1080, 1920);
+    grad.addColorStop(0, '#ff6b9d');
+    grad.addColorStop(0.5, '#c44569');
+    grad.addColorStop(1, '#a855f7');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1080, 1920);
+    
+    // Decorative hearts in background
+    ctx.font = '48px serif';
+    ctx.globalAlpha = 0.15;
+    const decorEmojis = ['💕', '💖', '🌸', '✨', '💗'];
+    for (let i = 0; i < 30; i++) {
+        const x = Math.random() * 1080;
+        const y = Math.random() * 1920;
+        ctx.fillText(decorEmojis[i % decorEmojis.length], x, y);
+    }
+    ctx.globalAlpha = 1;
+    
+    // White card area
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    roundRect(ctx, 60, 200, 960, 1520, 40);
+    ctx.fill();
+    
+    // Title decoration
+    ctx.font = '72px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('💌', 540, 320);
+    
+    // "Untukmu, [nama]" 
+    ctx.fillStyle = '#c44569';
+    ctx.font = 'italic 64px "Georgia", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Untukmu, ${nama || 'Sayang'}`, 540, 420);
+    
+    // Decorative line
+    ctx.strokeStyle = '#e8c0d0';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(390, 460);
+    ctx.lineTo(690, 460);
+    ctx.stroke();
+    
+    // Body text - wrap & render
+    ctx.fillStyle = '#444';
+    ctx.font = '32px "Georgia", serif';
+    ctx.textAlign = 'left';
+    
+    const fullText = aiResultParts.slice(2, 6).join('\n\n');
+    const wrapped = wrapText(ctx, fullText, 880);
+    let yPos = 540;
+    const lineHeight = 48;
+    const maxY = 1620;
+    
+    for (const line of wrapped) {
+        if (yPos > maxY) {
+            ctx.font = 'italic 28px serif';
+            ctx.fillStyle = '#999';
+            ctx.fillText('...', 100, yPos);
+            break;
+        }
+        ctx.fillText(line, 100, yPos);
+        yPos += lineHeight;
+    }
+    
+    // From section
+    if (yPos < maxY - 100) {
+        yPos += 40;
+        ctx.fillStyle = '#999';
+        ctx.font = 'italic 28px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Dengan segenap cinta,', 540, yPos);
+        yPos += 50;
+        ctx.fillStyle = '#c44569';
+        ctx.font = 'italic 48px "Brush Script MT", cursive';
+        ctx.fillText(dari || 'Seseorang yang menyayangimu', 540, yPos);
+    }
+    
+    // Footer brand
+    ctx.fillStyle = '#999';
+    ctx.font = '24px "Poppins", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('💌 Dmaz Coba Coba', 540, 1870);
+    
+    // Convert to image and download
+    canvas.toBlob(function(blob) {
+        const link = document.createElement('a');
+        link.download = `pesan-untuk-${(nama || 'sayang').replace(/\s+/g, '-')}.png`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        showToast('✅ Gambar tersimpan!');
+    }, 'image/png');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+}
+
+function wrapText(ctx, text, maxWidth) {
+    const lines = [];
+    const paragraphs = text.split('\n');
+    for (const para of paragraphs) {
+        if (!para.trim()) { lines.push(''); continue; }
+        const words = para.split(' ');
+        let line = '';
+        for (const word of words) {
+            const testLine = line + word + ' ';
+            const w = ctx.measureText(testLine).width;
+            if (w > maxWidth && line) {
+                lines.push(line.trim());
+                line = word + ' ';
+            } else {
+                line = testLine;
+            }
+        }
+        if (line) lines.push(line.trim());
+        lines.push('');
+    }
+    return lines;
+}
+
+// ============= REACTION =============
+const reactionsCount = {};
+function reactWith(emoji) {
+    reactionsCount[emoji] = (reactionsCount[emoji] || 0) + 1;
+    
+    // Big explosion of that emoji
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'reaction-explosion';
+            el.textContent = emoji;
+            el.style.left = (40 + Math.random() * 20) + '%';
+            el.style.top = (50 + Math.random() * 20) + '%';
+            el.style.fontSize = (Math.random() * 30 + 30) + 'px';
+            const angle = Math.random() * 360;
+            const distance = 100 + Math.random() * 200;
+            el.style.setProperty('--tx', Math.cos(angle * Math.PI / 180) * distance + 'px');
+            el.style.setProperty('--ty', Math.sin(angle * Math.PI / 180) * distance + 'px');
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2000);
+        }, i * 30);
+    }
+    
+    showToast(`${emoji} Reaksi terkirim!`);
+    playSlideSound();
+    
+    // Save reactions to localStorage
+    try {
+        const key = `reactions_${nama}_${dari || 'anonymous'}`;
+        const stored = JSON.parse(localStorage.getItem(key) || '{}');
+        stored[emoji] = (stored[emoji] || 0) + 1;
+        stored.lastReact = Date.now();
+        localStorage.setItem(key, JSON.stringify(stored));
+    } catch (e) {}
+}

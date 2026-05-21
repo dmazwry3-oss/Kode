@@ -140,6 +140,9 @@ async function generateLink() {
         // Show regenerate button
         document.getElementById('regenerateBtn').style.display = '';
 
+        // Save to link history
+        saveLinkToHistory(nama, link, tema);
+
         setTimeout(() => resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         showToast('🎉 Pesan jadi! Link siap dibagikan');
     } catch (err) {
@@ -373,3 +376,92 @@ function previewLink() {
     const link = document.getElementById('generatedLink').href;
     window.open(link, '_blank');
 }
+
+
+
+
+// ============= LINK HISTORY =============
+function saveLinkToHistory(nama, link, tema) {
+    try {
+        const history = JSON.parse(localStorage.getItem('link_history') || '[]');
+        history.unshift({
+            nama, link, tema,
+            time: Date.now()
+        });
+        // Keep last 20 only
+        const trimmed = history.slice(0, 20);
+        localStorage.setItem('link_history', JSON.stringify(trimmed));
+        renderHistory();
+    } catch (e) {}
+}
+
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    const count = document.getElementById('historyCount');
+    if (!list) return;
+    
+    let history = [];
+    try {
+        history = JSON.parse(localStorage.getItem('link_history') || '[]');
+    } catch (e) {}
+    
+    if (count) count.textContent = history.length;
+    
+    if (history.length === 0) {
+        list.innerHTML = '<div class="history-empty">Belum ada link yang dibuat</div>';
+        return;
+    }
+    
+    list.innerHTML = history.map((item, idx) => {
+        const date = new Date(item.time);
+        const timeStr = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+        return `
+            <div class="history-item">
+                <div class="history-item-info">
+                    <div class="history-item-name">💕 ${escapeHtml(item.nama)}</div>
+                    <div class="history-item-date">${timeStr} • ${item.tema || 'romantis'}</div>
+                </div>
+                <div class="history-item-actions">
+                    <button class="history-btn" onclick="copyHistoryLink(${idx})">📋</button>
+                    <button class="history-btn" onclick="openHistoryLink(${idx})">👁</button>
+                    <button class="history-btn" onclick="deleteHistoryItem(${idx})">🗑</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function copyHistoryLink(idx) {
+    try {
+        const history = JSON.parse(localStorage.getItem('link_history') || '[]');
+        if (history[idx]) {
+            navigator.clipboard.writeText(history[idx].link).then(() => {
+                showToast('✅ Link disalin!');
+            }).catch(() => {});
+        }
+    } catch (e) {}
+}
+
+function openHistoryLink(idx) {
+    try {
+        const history = JSON.parse(localStorage.getItem('link_history') || '[]');
+        if (history[idx]) window.open(history[idx].link, '_blank');
+    } catch (e) {}
+}
+
+function deleteHistoryItem(idx) {
+    try {
+        const history = JSON.parse(localStorage.getItem('link_history') || '[]');
+        history.splice(idx, 1);
+        localStorage.setItem('link_history', JSON.stringify(history));
+        renderHistory();
+        showToast('🗑 Item dihapus');
+    } catch (e) {}
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Render on load
+window.addEventListener('DOMContentLoaded', renderHistory);
