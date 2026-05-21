@@ -1,4 +1,4 @@
-// Create particles
+// ============= PARTICLES =============
 function createParticles() {
     const container = document.getElementById('particles');
     if (!container) return;
@@ -13,15 +13,38 @@ function createParticles() {
         container.appendChild(p);
     }
 }
-
 createParticles();
 
-// Load saved data
+// ============= HEART CLICK EFFECT =============
+const heartEmojis = ['💕', '💖', '💗', '💝', '💘', '💞', '✨'];
+document.addEventListener('click', function(e) {
+    if (e.target.closest('button, a, input, select, .toggle-eye, summary')) return;
+    spawnHeart(e.clientX, e.clientY);
+});
+
+function spawnHeart(x, y) {
+    const heart = document.createElement('div');
+    heart.className = 'click-heart';
+    heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+    heart.style.left = x + 'px';
+    heart.style.top = y + 'px';
+    heart.style.fontSize = (Math.random() * 15 + 22) + 'px';
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1500);
+}
+
+// ============= LOAD SAVED DATA =============
 window.addEventListener('DOMContentLoaded', function() {
     const savedKey = localStorage.getItem('gemini_api_key');
     if (savedKey) document.getElementById('apiKey').value = savedKey;
     const savedPengirim = localStorage.getItem('bucin_pengirim');
     if (savedPengirim) document.getElementById('pengirim').value = savedPengirim;
+    const savedTema = localStorage.getItem('bucin_tema');
+    if (savedTema) document.getElementById('tema').value = savedTema;
+
+    // Counter
+    let counter = parseInt(localStorage.getItem('msg_count') || '0');
+    document.querySelectorAll('.stat-num')[2].textContent = counter > 0 ? counter + 'x' : '∞';
 });
 
 function toggleApiKey() {
@@ -36,6 +59,14 @@ function toggleApiKey() {
     }
 }
 
+function showToast(text) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = text;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
 function generateLink() {
     const apiKey = document.getElementById('apiKey').value.trim();
     const pengirim = document.getElementById('pengirim').value.trim();
@@ -43,12 +74,30 @@ function generateLink() {
     const hubungan = document.getElementById('hubungan').value;
     const tema = document.getElementById('tema').value;
 
-    if (!apiKey) { alert('Masukkan API Key Gemini dulu ya!\nGratis di aistudio.google.com/apikey'); return; }
-    if (!nama) { alert('Masukkan nama dia dulu ya!'); return; }
-    if (!hubungan) { alert('Pilih hubungan dulu ya!'); return; }
+    if (!apiKey) {
+        showToast('🔑 Masukkan API Key dulu ya!');
+        document.getElementById('apiKey').focus();
+        return;
+    }
+    if (!nama) {
+        showToast('💕 Masukkan nama dia dulu!');
+        document.getElementById('nama').focus();
+        return;
+    }
+    if (!hubungan) {
+        showToast('💍 Pilih hubungan dulu!');
+        document.getElementById('hubungan').focus();
+        return;
+    }
 
     localStorage.setItem('gemini_api_key', apiKey);
     if (pengirim) localStorage.setItem('bucin_pengirim', pengirim);
+    localStorage.setItem('bucin_tema', tema);
+
+    // Increment counter
+    let counter = parseInt(localStorage.getItem('msg_count') || '0') + 1;
+    localStorage.setItem('msg_count', counter);
+    document.querySelectorAll('.stat-num')[2].textContent = counter + 'x';
 
     const baseUrl = window.location.href.replace('index.html', '').replace(/\/$/, '');
     const params = new URLSearchParams({ nama, hubungan, tema, key: apiKey });
@@ -64,14 +113,14 @@ function generateLink() {
     resultDiv.classList.remove('hidden');
     document.getElementById('copyNotif').classList.add('hidden');
 
-    // Scroll to result
-    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    showToast('🎉 Link berhasil dibuat!');
 }
 
 function copyLink() {
     const link = document.getElementById('generatedLink').href;
     navigator.clipboard.writeText(link).then(() => {
-        showNotif();
+        showCopyNotif();
     }).catch(() => {
         const t = document.createElement('input');
         t.value = link;
@@ -79,20 +128,21 @@ function copyLink() {
         t.select();
         document.execCommand('copy');
         document.body.removeChild(t);
-        showNotif();
+        showCopyNotif();
     });
 }
 
-function showNotif() {
+function showCopyNotif() {
     const notif = document.getElementById('copyNotif');
     notif.classList.remove('hidden');
     setTimeout(() => notif.classList.add('hidden'), 3000);
+    showToast('✅ Link disalin!');
 }
 
 function shareLink() {
     const link = document.getElementById('generatedLink').href;
     const nama = document.getElementById('nama').value.trim();
-    const text = `Hai ${nama}! 💕 Ada pesan spesial buat kamu, buka ya: ${link}`;
+    const text = `Hai ${nama}! 💕\n\nAda pesan spesial buat kamu, buka ya:\n${link}`;
     if (navigator.share) {
         navigator.share({ title: 'Pesan Cinta - Dmaz Coba Coba', text, url: link });
     } else {

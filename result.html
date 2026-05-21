@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pesan Cinta Untukmu 💌</title>
+    <title>Pesan Cinta Untukmu 💌 - Dmaz Coba Coba</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Satisfy&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
     <meta name="theme-color" content="#e84393">
@@ -12,10 +12,19 @@
     <div class="particles" id="particles"></div>
     <div class="floating-elements" id="floatingElements"></div>
 
+    <!-- Top control bar -->
+    <div class="top-controls">
+        <button class="ctrl-btn" id="prevBtn" onclick="prevSlide()" style="display:none" title="Sebelumnya">←</button>
+        <button class="ctrl-btn" id="soundBtn" onclick="toggleSound()" title="Toggle suara">🔊</button>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
     <!-- SLIDES -->
     <div class="slides-container" id="slidesContainer">
         
-        <!-- SLIDE 1: Intro -->
+        <!-- SLIDE 1 -->
         <div class="slide active" id="slide1">
             <div class="slide-content centered">
                 <div class="intro-animation">
@@ -26,10 +35,14 @@
                 </div>
                 <h1 class="slide-title fade-in-up">Hai, <span id="namaSlide1"></span>!</h1>
                 <p class="slide-subtitle fade-in-up delay1">Ada seseorang yang ingin menyampaikan sesuatu untukmu...</p>
+                <div class="hint-tap fade-in-up delay2">
+                    <span>👆</span> Klik dimana saja, ada kejutan!
+                </div>
                 <div class="sticker-row fade-in-up delay2">
                     <span class="sticker-bounce">🦋</span>
                     <span class="sticker-bounce">💫</span>
                     <span class="sticker-bounce">🌸</span>
+                    <span class="sticker-bounce">✨</span>
                 </div>
                 <button class="next-btn pulse-btn fade-in-up delay3" onclick="nextSlide()">
                     <span>Buka Pesan</span> <span class="arrow">→</span>
@@ -37,7 +50,7 @@
             </div>
         </div>
 
-        <!-- SLIDE 2: Teaser -->
+        <!-- SLIDE 2 -->
         <div class="slide" id="slide2">
             <div class="slide-content centered">
                 <div class="sticker-grid-anim">
@@ -58,7 +71,7 @@
                     <span class="sticker-bounce">🥹</span>
                 </div>
                 <button class="next-btn fade-in-up delay3" onclick="nextSlide()">
-                    <span>Geser lagi</span> <span class="arrow">→</span>
+                    <span>Lanjut</span> <span class="arrow">→</span>
                 </button>
             </div>
         </div>
@@ -80,7 +93,7 @@
                     <div class="typing-indicator">
                         <span></span><span></span><span></span>
                     </div>
-                    <p>Menulis pesan cinta...</p>
+                    <p id="loadingText">Menulis pesan cinta...</p>
                 </div>
                 <button class="next-btn" id="nextBtn3" onclick="nextSlide()" style="display:none">
                     <span>Lanjut baca</span> <span class="arrow">→</span>
@@ -88,12 +101,15 @@
             </div>
         </div>
 
-        <!-- SLIDE 4: Message Part 2 -->
+        <!-- SLIDE 4 -->
         <div class="slide" id="slide4">
             <div class="slide-content">
                 <div class="sticker-explosion">
                     <span>💖</span><span>🌸</span><span>✨</span>
                     <span>🦋</span><span>💫</span><span>🌺</span>
+                </div>
+                <div class="slide-mini-title">
+                    <span>💕</span> Yang bikin aku jatuh cinta... <span>💕</span>
                 </div>
                 <div class="message-box">
                     <p id="messageP2" class="message-text"></p>
@@ -110,7 +126,7 @@
             </div>
         </div>
 
-        <!-- SLIDE 5: Promise -->
+        <!-- SLIDE 5 -->
         <div class="slide" id="slide5">
             <div class="slide-content">
                 <div class="promise-header">
@@ -127,7 +143,7 @@
                     <span class="sticker-bounce">🔐</span>
                 </div>
                 <button class="next-btn" onclick="nextSlide()">
-                    <span>Terakhir</span> <span class="arrow">→</span>
+                    <span>Penutup</span> <span class="arrow">→</span>
                 </button>
             </div>
         </div>
@@ -136,9 +152,9 @@
         <div class="slide" id="slide6">
             <div class="slide-content centered">
                 <div class="final-stickers">
-                    <span class="confetti">🎊</span>
-                    <span class="confetti">💝</span>
-                    <span class="confetti">🎊</span>
+                    <span class="confetti-spin">🎊</span>
+                    <span class="confetti-spin">💝</span>
+                    <span class="confetti-spin">🎊</span>
                 </div>
                 <div class="final-message">
                     <p id="messageP4" class="message-text final-text"></p>
@@ -150,6 +166,13 @@
                 <div class="final-decoration">
                     <span>🌹</span><span>✨</span><span>💌</span><span>✨</span><span>🌹</span>
                 </div>
+                
+                <!-- Action buttons -->
+                <div class="final-actions">
+                    <button class="action-pill" onclick="copyMessage()">📋 Salin Pesan</button>
+                    <button class="action-pill" onclick="shareMessage()">💬 Share WA</button>
+                </div>
+                
                 <div class="final-sticker-grid">
                     <span>🥰</span><span>💕</span><span>😘</span>
                     <span>💗</span><span>🫠</span><span>💞</span>
@@ -161,6 +184,7 @@
                 </div>
                 <div class="credit-footer">
                     <p>Dibuat dengan ❤️ oleh <a href="https://instagram.com/dmsmaul05" target="_blank">@dmsmaul05</a></p>
+                    <p style="margin-top:5px;font-size:0.65rem;">Dmaz Coba Coba • v3.0</p>
                 </div>
             </div>
         </div>
