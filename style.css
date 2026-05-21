@@ -188,16 +188,21 @@ body.result-page {
 .toggle-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.6; }
 .toggle-eye:hover { opacity: 1; }
 
-.form-group input, .form-group select {
+.form-group input, .form-group select, .form-group textarea {
     width: 100%; padding: 12px 15px;
     border: 2px solid rgba(255,255,255,0.2);
     border-radius: 12px; font-size: 0.9rem;
     font-family: 'Poppins', sans-serif;
     transition: all 0.3s; outline: none;
     background: rgba(255,255,255,0.92); color: #333;
+    resize: vertical;
 }
-.form-group input:focus, .form-group select:focus { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.25); transform: translateY(-1px); }
-.form-group input::placeholder { color: #aaa; }
+.form-group textarea {
+    min-height: 80px;
+    line-height: 1.5;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.25); transform: translateY(-1px); }
+.form-group input::placeholder, .form-group textarea::placeholder { color: #aaa; }
 
 .hint { color: rgba(255,255,255,0.65); font-size: 0.7rem; margin-top: 4px; display: block; line-height: 1.4; }
 .hint a { color: rgba(255,255,255,0.95); text-decoration: underline; }

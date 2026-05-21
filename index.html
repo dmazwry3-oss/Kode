@@ -116,8 +116,30 @@
                         <option value="drama">🎬 Drama Korea</option>
                         <option value="tsundere">😤 Tsundere (Galak Manis)</option>
                         <option value="puisi">📜 Puisi Indah</option>
+                        <option value="anniversary">🎂 Anniversary</option>
+                        <option value="permintaan_maaf">🙏 Minta Maaf</option>
+                        <option value="ldr">📞 LDR (Long Distance)</option>
                     </select>
                     <small class="hint">Setiap tema menghasilkan gaya & variasi yang berbeda!</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="panjang">
+                        <span class="label-icon">📏</span> Panjang Pesan
+                    </label>
+                    <select id="panjang">
+                        <option value="sedang">📄 Sedang (~300 kata)</option>
+                        <option value="panjang" selected>📜 Panjang (~500 kata)</option>
+                        <option value="sangat_panjang">📚 Super Panjang (~700 kata)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cerita">
+                        <span class="label-icon">💭</span> Cerita Spesial <span style="font-weight:300;opacity:0.7;">(opsional)</span>
+                    </label>
+                    <textarea id="cerita" rows="3" placeholder="Ceritakan hal spesial: kenangan, kebiasaan dia, kapan ketemu, kebiasaan lucu, dll. AI akan pakai info ini buat bikin pesan lebih personal..."></textarea>
+                    <small class="hint">💡 Contoh: "Kami pacaran 2 tahun, sering ngopi bareng, dia suka banget hujan, namanya unik karena..."</small>
                 </div>
                 
                 <button id="generateBtn" onclick="generateLink()">

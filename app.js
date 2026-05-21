@@ -41,6 +41,8 @@ window.addEventListener('DOMContentLoaded', function() {
     if (savedPengirim) document.getElementById('pengirim').value = savedPengirim;
     const savedTema = localStorage.getItem('bucin_tema');
     if (savedTema) document.getElementById('tema').value = savedTema;
+    const savedCerita = localStorage.getItem('bucin_cerita');
+    if (savedCerita) document.getElementById('cerita').value = savedCerita;
 
     // Counter
     let counter = parseInt(localStorage.getItem('msg_count') || '0');
@@ -73,6 +75,8 @@ function generateLink() {
     const nama = document.getElementById('nama').value.trim();
     const hubungan = document.getElementById('hubungan').value;
     const tema = document.getElementById('tema').value;
+    const panjang = document.getElementById('panjang').value;
+    const cerita = document.getElementById('cerita').value.trim();
 
     if (!apiKey) {
         showToast('🔑 Masukkan API Key dulu ya!');
@@ -93,6 +97,7 @@ function generateLink() {
     localStorage.setItem('gemini_api_key', apiKey);
     if (pengirim) localStorage.setItem('bucin_pengirim', pengirim);
     localStorage.setItem('bucin_tema', tema);
+    if (cerita) localStorage.setItem('bucin_cerita', cerita);
 
     // Increment counter
     let counter = parseInt(localStorage.getItem('msg_count') || '0') + 1;
@@ -100,8 +105,9 @@ function generateLink() {
     document.querySelectorAll('.stat-num')[2].textContent = counter + 'x';
 
     const baseUrl = window.location.href.replace('index.html', '').replace(/\/$/, '');
-    const params = new URLSearchParams({ nama, hubungan, tema, key: apiKey });
+    const params = new URLSearchParams({ nama, hubungan, tema, panjang, key: apiKey });
     if (pengirim) params.set('dari', pengirim);
+    if (cerita) params.set('cerita', cerita);
     
     const link = `${baseUrl}/result.html?${params.toString()}`;
 

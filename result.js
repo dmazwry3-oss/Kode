@@ -131,6 +131,8 @@ const hubungan = urlParams.get('hubungan');
 const apiKey = urlParams.get('key');
 const dari = urlParams.get('dari');
 const tema = urlParams.get('tema') || 'romantis';
+const panjang = urlParams.get('panjang') || 'panjang';
+const cerita = urlParams.get('cerita') || '';
 
 // Set names
 const namaSlide1 = document.getElementById('namaSlide1');
@@ -249,61 +251,131 @@ async function generateRomanticMessage() {
         'pacar': 'pacar tercinta',
         'suami': 'suami tersayang',
         'istri': 'istri tercinta',
-        'gebetan': 'gebetan (orang yang sedang aku taksir)',
-        'mantan': 'mantan yang masih dirindukan',
+        'gebetan': 'gebetan, orang yang sedang aku taksir diam-diam',
+        'mantan': 'mantan kekasih yang masih ada di hati',
         'sahabat': 'sahabat paling spesial',
-        'crush': 'crush diam-diam',
+        'crush': 'crush yang aku kagumi diam-diam',
         'calon': 'calon pasangan hidup'
     };
 
     const temaPrompt = {
-        'romantis': 'Gaya bahasa romantis klasik yang menyentuh hati, lembut, penuh cinta seperti puisi cinta.',
-        'bucin': 'Gaya bahasa BUCIN ABIS, lebay tapi manis, kekinian, penuh kata-kata "cintaku", "sayangku", "bidadariku/pangeranku", yang bikin cringe tapi senang. Pakai kata-kata gak masuk akal kayak "rela jadi sandal jepit kamu", "aku adalah debu di kakimu".',
-        'puitis': 'Gaya puitis sangat dalam, penuh metafora cinta tentang bulan, bintang, samudra, hujan, senja. Bagai sajak indah Sapardi atau Chairil Anwar versi cinta.',
-        'lucu': 'Gaya romantis tapi LUCU dan KOCAK. Selipkan jokes receh, plesetan kata, atau perumpamaan absurd tapi manis. Contoh: "Kamu kayak charger, hidupku gak nyala tanpa kamu", "Aku tuh kayak WiFi, dan kamu adalah passwordnya". Bikin tersenyum dan ngakak.',
-        'rindu': 'Gaya tentang RINDU yang sangat mendalam, seolah sudah lama gak ketemu. Penuh dengan deskripsi rasa rindu yang menyiksa tapi indah, kangen suara, kangen tatapan, kangen semuanya.',
-        'malam': 'Gaya ucapan SELAMAT MALAM yang romantis. Bicarakan tentang mimpi, bintang, tidur nyenyak, rindu di malam hari, ingin memeluk dalam tidur.',
-        'gombal': 'Gaya GOMBAL super lebay, kayak rayuan playboy. Pakai gombalan klasik plus yang baru-baru kayak "Kamu Google ya? Karena di kamu aku menemukan segalanya". Buat banyak gombalan beruntun yang bikin meleleh.',
-        'drama': 'Gaya kayak DRAMA KOREA yang dramatis. Cinta yang penuh perjuangan, episode kehidupan, takdir, jodoh, sampai mati. Buat kayak monolog drakor yang bikin nangis.',
-        'tsundere': 'Gaya TSUNDERE - awalnya tsun (jutek/galak/malu-malu) tapi diam-diam dere (cinta banget). Contoh: "B-bukan berarti aku sayang kamu kok, jangan ge-er!" tapi terus bilang sayang. Lucu dan gemes.',
-        'puisi': 'Tulis dalam bentuk PUISI INDAH dengan bait-bait yang puitis. Setiap kalimat punya rima atau ritme.'
+        'romantis': 'Gaya ROMANTIS KLASIK. Lembut, puitis, menyentuh hati seperti puisi cinta klasik. Gunakan kata-kata seperti "kekasih", "belahan jiwa", "cintaku", "mentariku".',
+        'bucin': 'Gaya BUCIN ABIS. Sangat lebay, manja, kekinian, full kata "sayangku", "cintaku", "bidadariku/pangeranku". Boleh pakai perumpamaan absurd kayak "rela jadi sandal jepit kamu", "aku adalah debu di kakimu", "tanpa kamu hidupku gak ada notif". Cringe tapi manis dan menggemaskan.',
+        'puitis': 'Gaya PUITIS sangat dalam dan sastra. Penuh metafora indah tentang bulan, bintang, samudra, hujan, senja, daun gugur. Bagai puisi Sapardi Djoko Damono atau Chairil Anwar versi cinta. Gunakan diksi yang indah dan tidak biasa.',
+        'lucu': 'Gaya ROMANTIS + LUCU dan KOCAK. Selipkan banyak jokes receh, plesetan kata, pun, atau perumpamaan absurd tapi manis. Contoh kreatif: "Kamu kayak charger, hidupku gak nyala tanpa kamu", "Aku tuh kayak WiFi, dan kamu adalah passwordnya yang gak pernah aku lupa", "Kamu kayak indomie, gak pernah bosen aku liat", "Kamu adalah CTRL+S hidupku, bikin aku gak takut kehilangan". Bikin senyum & ngakak. WAJIB ada minimal 4 jokes.',
+        'rindu': 'Gaya RINDU MENDALAM. Seolah sudah lama gak ketemu. Penuh deskripsi rasa rindu yang menyiksa tapi indah. Kangen suara, tatapan, senyum, sentuhan, aroma. Buat sangat emosional dan mendalam.',
+        'malam': 'Gaya UCAPAN SELAMAT MALAM. Bicarakan tentang mimpi, bintang, bulan, tidur nyenyak, peluk dalam imajinasi, doa baik untuk dia di malam hari. Hangat dan menenangkan.',
+        'gombal': 'Gaya GOMBAL SUPER LEBAY. Kayak rayuan playboy ahli. Buat MINIMAL 5 gombalan beruntun yang kreatif dan memorable. Contoh: "Kamu Google ya? Karena di kamu aku menemukan segalanya yang aku cari", "Apa kamu kacamata? Karena tanpa kamu hidupku buram", "Kamu pencuri ya? Soalnya kamu udah curi hatiku". Bikin meleleh.',
+        'drama': 'Gaya DRAMA KOREA dramatis. Cinta yang penuh perjuangan, episode kehidupan, takdir, jodoh, sampai akhir hayat. Buat seperti monolog drakor yang bikin nangis. Bisa selipkan istilah seperti "takdir", "jodoh", "hingga akhir waktu".',
+        'tsundere': 'Gaya TSUNDERE - awalnya jutek/galak/malu-malu (tsun) tapi diam-diam super cinta (dere). Contoh: "B-bukan berarti aku sayang kamu kok jangan ge-er!", "Hmm... bukannya aku rindu sih, cuma emang kamu suka tiba-tiba muncul di pikiran". Lucu, gemas, kontradiktif tapi manis.',
+        'puisi': 'Tulis murni dalam bentuk PUISI INDAH. Bait-bait dengan rima atau ritme. Setiap baris pendek tapi indah. Pakai majas dan diksi yang luar biasa. Pisahkan baris dengan enter.',
+        'anniversary': 'Gaya UCAPAN ANNIVERSARY/HARI JADI. Ungkapkan syukur dan cinta untuk perjalanan bersama. Singgung tentang kenangan, perjuangan bersama, harapan ke depan. Manis dan haru.',
+        'permintaan_maaf': 'Gaya PERMINTAAN MAAF yang TULUS. Akui kesalahan dengan rendah hati, ungkapkan penyesalan mendalam, janjikan perubahan. Sangat tulus, bukan klise. Bikin dia luluh.',
+        'ldr': 'Gaya LDR (LONG DISTANCE). Tentang jarak yang memisahkan tapi cinta yang mendekatkan. Bicara tentang menunggu, video call, rindu, mimpi bertemu. Penuh harapan & kesabaran.'
     };
 
-    // Random bumbu untuk variasi
-    const bumbuRandom = [
-        'Selipkan satu kata atau frasa unik yang gak biasa.',
-        'Gunakan satu perumpamaan kreatif yang tidak biasa.',
-        'Buat satu kalimat yang sangat memorable di tengah-tengah.',
-        'Tambahkan referensi ke hal sehari-hari (kopi, hujan, mie ayam, dll) yang romantis.',
-        'Selipkan sentuhan humor halus di salah satu bagian.',
-        'Buat ada plot twist kecil yang manis.'
+    const panjangSpec = {
+        'sedang': { katas: '300', kalimatPerBagian: '4-5 kalimat', tokens: 800 },
+        'panjang': { katas: '500', kalimatPerBagian: '6-7 kalimat', tokens: 1300 },
+        'sangat_panjang': { katas: '700', kalimatPerBagian: '8-10 kalimat', tokens: 1800 }
+    };
+    const spec = panjangSpec[panjang] || panjangSpec['panjang'];
+
+    // Random bumbu kreatif
+    const bumbuList = [
+        'Selipkan satu metafora kreatif tentang kopi, hujan, atau senja.',
+        'Tambahkan satu kalimat "andai" yang romantis ("andai aku bisa..." / "andai waktu...").',
+        'Buat satu plot twist kecil yang manis di tengah pesan.',
+        'Selipkan referensi ke hal sehari-hari yang bikin pesan terasa nyata (mie ayam, ngopi, hujan, dll).',
+        'Tambahkan satu pertanyaan retoris yang puitis ("Tahukah kamu...?").',
+        'Selipkan satu kata atau ungkapan dalam bahasa daerah/asing yang romantis (sayang, eonni, anata, mi amor, dll).',
+        'Buat ada satu kalimat sangat singkat tapi powerful di tengah-tengah (3-5 kata saja).',
+        'Tambahkan janji konkret yang spesifik dan unik.',
+        'Selipkan satu kalimat tentang detik dan waktu yang puitis.',
+        'Buat ada momen "aku ingin..." yang detail dan menyentuh.'
     ];
-    const bumbu = bumbuRandom[Math.floor(Math.random() * bumbuRandom.length)];
+    const bumbuPicked = [
+        bumbuList[Math.floor(Math.random() * bumbuList.length)],
+        bumbuList[Math.floor(Math.random() * bumbuList.length)]
+    ];
 
-    const prompt = `Kamu adalah penulis pesan cinta paling jago di Indonesia, ahli dalam membuat pesan yang viral di sosmed. Buatkan pesan cinta untuk "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} saya${dari ? ` dari "${dari}"` : ''}.
+    // Random opener style
+    const openerStyles = [
+        `Mulai dengan menyebutkan nama "${nama}" langsung di awal seperti panggilan sayang.`,
+        `Mulai dengan pertanyaan retoris yang menyentuh ("Tahukah kamu, ${nama}...").`,
+        `Mulai dengan deskripsi suasana atau perasaan yang sedang dialami penulis sekarang.`,
+        `Mulai dengan ungkapan "Untukmu yang..." diikuti deskripsi unik tentang dia.`,
+        `Mulai dengan pengakuan "Aku ingin kamu tahu..." yang langsung menyentuh hati.`
+    ];
+    const opener = openerStyles[Math.floor(Math.random() * openerStyles.length)];
 
-GAYA: ${temaPrompt[tema] || temaPrompt['romantis']}
+    const ceritaContext = cerita ? `\n\nKONTEKS PERSONAL TENTANG ${nama.toUpperCase()} & HUBUNGAN KAMI (PENTING - integrasikan dengan natural ke dalam pesan):\n"${cerita}"\n\nGunakan info di atas untuk membuat pesan yang SANGAT PERSONAL dan terasa benar-benar mengenal "${nama}". Jangan paksa semua info masuk, tapi pilih yang paling menyentuh dan integrasikan dengan natural.` : '';
 
-BUMBU TAMBAHAN: ${bumbu}
+    const prompt = `Kamu adalah penulis pesan cinta paling jago di Indonesia. Karyamu sering viral di TikTok dan Instagram karena selalu bikin baper. Kamu ahli dalam membuat pesan yang TERASA NYATA, PERSONAL, dan EMOSIONAL.
 
-PENTING - Format output WAJIB seperti ini, TEPAT 4 bagian dipisahkan "---":
+TUGAS: Tulis pesan cinta untuk "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} dari saya${dari ? ` (pengirim: "${dari}")` : ''}.
 
-Bagian 1 (PEMBUKA - 4-5 kalimat): Sapaan unik untuk "${nama}". Ungkapkan betapa berartinya dia. Buat opening yang langsung bikin baper sejak kalimat pertama. Sebutkan nama "${nama}".
+GAYA WAJIB: ${temaPrompt[tema] || temaPrompt['romantis']}
 
-Bagian 2 (DETAIL - 4-5 kalimat): Ceritakan hal-hal SPESIFIK yang bikin jatuh cinta - bisa tentang senyum, suara, cara dia tertawa, kebiasaan kecil, atau apapun. Buat detail dan personal seolah benar-benar mengenal dia.
+OPENING STYLE: ${opener}
 
-Bagian 3 (JANJI/HARAPAN - 3-4 kalimat): Tentang masa depan, janji, harapan, atau komitmen. Buat sangat dalam dan berkesan.
+BUMBU TAMBAHAN (WAJIB diintegrasikan):
+1. ${bumbuPicked[0]}
+2. ${bumbuPicked[1]}
+${ceritaContext}
 
-Bagian 4 (PENUTUP - 2-3 kalimat): Penutup yang KILLER, memorable, bikin nangis bahagia. Akhiri dengan kalimat yang akan diingat selamanya.
+============================================
+FORMAT OUTPUT - SANGAT KETAT:
 
-ATURAN KETAT:
-- Total minimal 200 kata
-- Bahasa Indonesia natural
-- Tanpa markdown/bullet/emoji/format apapun
-- Pisahkan 4 bagian HANYA dengan "---" di baris baru
-- Variatif dan jangan generik
-- Buat sangat personal seolah benar-benar mengenal "${nama}"
-- Output harus berbeda setiap kali bahkan untuk input yang sama (kreatif!)`;
+Tulis TEPAT 4 bagian yang dipisahkan TANDA "---" di baris baru.
+
+📌 Bagian 1 - PEMBUKA (${spec.kalimatPerBagian}):
+- Sapaan personal untuk "${nama}"
+- Ungkapan langsung tentang betapa berartinya dia
+- Buat kalimat pertama yang SANGAT MEMORABLE dan instant bikin baper
+- Sebutkan nama "${nama}" minimal 1x
+
+📌 Bagian 2 - DETAIL & ALASAN (${spec.kalimatPerBagian}):
+- Ceritakan SPESIFIK hal-hal yang bikin jatuh cinta/sayang
+- Detail yang sangat personal: senyum, tatapan, suara tawa, kebiasaan kecil, cara dia ngomong, dll
+- Buat seolah benar-benar mengenal dia dengan dalam
+- Sebut detail yang gak biasa, yang bikin "wah dia tau banget"
+
+📌 Bagian 3 - JANJI & HARAPAN (${spec.kalimatPerBagian}):
+- Komitmen, janji, atau harapan untuk masa depan
+- Buat sangat dalam, spesifik, dan tulus
+- Hindari janji generik, buat yang konkret
+
+📌 Bagian 4 - PENUTUP KILLER (3-5 kalimat):
+- Penutup yang akan terus diingat
+- Kalimat akhir yang VERY MEMORABLE
+- Bisa 1 kalimat puitis powerful + 1-2 kalimat penegasan cinta
+
+============================================
+ATURAN KETAT (WAJIB DIIKUTI):
+✅ Total minimal ${spec.katas} kata
+✅ Bahasa Indonesia natural & mengalir
+✅ Setiap kalimat punya value, gak ada filler
+✅ Variatif dan tidak generik
+✅ JANGAN gunakan emoji sama sekali
+✅ JANGAN gunakan markdown (tanpa **, ##, -)
+✅ JANGAN tulis judul atau label seperti "Bagian 1:"
+✅ Pisahkan 4 bagian HANYA dengan "---" di baris kosong
+✅ Setiap kali generate harus berbeda meski input sama (KREATIF!)
+✅ Sebutkan nama "${nama}" minimal 2x di seluruh pesan
+
+CONTOH STRUKTUR OUTPUT (jangan tiru kontennya, tiru hanya formatnya):
+
+Untukmu, [nama] yang selalu kucintai... [kalimat panjang 1]. [kalimat panjang 2]. [dst]
+---
+Kamu tahu apa yang paling kucinta dari kamu? [kalimat panjang 1]. [kalimat panjang 2]. [dst]
+---
+Dan aku berjanji padamu... [kalimat panjang 1]. [kalimat panjang 2]. [dst]
+---
+[Kalimat penutup powerful 1]. [Kalimat akhir memorable 2].
+
+============================================
+Sekarang, tulis pesannya. Buat yang BIKIN MELELEH:`;
 
     let lastError = '';
 
@@ -315,7 +387,12 @@ ATURAN KETAT:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 1.2, maxOutputTokens: 1000, topP: 0.95 }
+                    generationConfig: {
+                        temperature: 1.15,
+                        maxOutputTokens: spec.tokens,
+                        topP: 0.95,
+                        topK: 40
+                    }
                 })
             });
 
