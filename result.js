@@ -1,11 +1,70 @@
+// Create particles
+function createParticles() {
+    const container = document.getElementById('particles');
+    if (!container) return;
+    
+    for (let i = 0; i < 25; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.width = (Math.random() * 5 + 2) + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDelay = Math.random() * 8 + 's';
+        particle.style.animationDuration = (Math.random() * 6 + 5) + 's';
+        container.appendChild(particle);
+    }
+}
+
+// Create floating hearts/elements
+function createFloatingElements() {
+    const container = document.getElementById('floatingElements');
+    if (!container) return;
+    
+    const emojis = ['💕', '💗', '✨', '🌸', '💫', '🦋', '🌹', '💝'];
+    
+    for (let i = 0; i < 12; i++) {
+        const el = document.createElement('div');
+        el.classList.add('float-el');
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = Math.random() * 100 + '%';
+        el.style.animationDelay = Math.random() * 7 + 's';
+        el.style.animationDuration = (Math.random() * 5 + 6) + 's';
+        el.style.fontSize = (Math.random() * 15 + 15) + 'px';
+        container.appendChild(el);
+    }
+}
+
+createParticles();
+createFloatingElements();
+
 // Get parameters from URL
 const urlParams = new URLSearchParams(window.location.search);
 const nama = urlParams.get('nama');
 const hubungan = urlParams.get('hubungan');
 const apiKey = urlParams.get('key');
+const dari = urlParams.get('dari');
 
 // Display name
-document.getElementById('namaTarget').textContent = nama || 'Sayang';
+const namaTarget = document.getElementById('namaTarget');
+if (namaTarget) namaTarget.textContent = nama || 'Sayang';
+
+// Display sender name
+const fromName = document.getElementById('fromName');
+if (fromName && dari) {
+    fromName.textContent = dari;
+}
+
+// Envelope open animation
+function openEnvelope() {
+    const envelope = document.getElementById('envelope');
+    envelope.classList.add('opened');
+    
+    setTimeout(() => {
+        document.getElementById('envelopeScreen').classList.add('hidden');
+        document.getElementById('messageScreen').classList.remove('hidden');
+        generateRomanticMessage();
+    }, 800);
+}
 
 // Generate romantic message
 async function generateRomanticMessage() {
@@ -22,7 +81,6 @@ async function generateRomanticMessage() {
         return;
     }
 
-    // Try multiple model names in case one doesn't work
     const models = [
         'gemini-3.5-flash',
         'gemini-2.0-flash',
@@ -35,17 +93,20 @@ async function generateRomanticMessage() {
         'istri': 'istri',
         'gebetan': 'gebetan (orang yang disukai)',
         'mantan': 'mantan kekasih',
-        'sahabat': 'sahabat spesial'
+        'sahabat': 'sahabat spesial',
+        'crush': 'orang yang diam-diam disukai'
     };
 
-    const prompt = `Buatkan kata-kata romantis dan menyentuh hati dalam bahasa Indonesia untuk seseorang bernama "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} saya. 
+    const prompt = `Kamu adalah penulis kata-kata romantis yang sangat berbakat. Buatkan kata-kata romantis, puitis, dan sangat menyentuh hati dalam bahasa Indonesia untuk seseorang bernama "${nama}" yang merupakan ${hubunganText[hubungan] || hubungan} saya${dari ? ` (dari ${dari})` : ''}.
 
-Buatkan dalam format:
-- 1 paragraf pembuka yang manis (2-3 kalimat)
-- 3-4 kalimat puitis tentang perasaan cinta
-- 1 kalimat penutup yang bikin baper
+Buatkan pesan yang benar-benar bikin baper dengan format:
+- Awali dengan sapaan manis yang personal (sebutkan nama ${nama})
+- 2-3 kalimat pembuka yang lembut dan menyentuh
+- 3-4 kalimat puitis tentang perasaan cinta yang mendalam
+- 1-2 kalimat tentang harapan/janji
+- Tutup dengan kalimat yang sangat romantis dan bikin meleleh
 
-Gunakan bahasa yang puitis, romantis, dan menyentuh hati. Jangan gunakan markdown atau format khusus, cukup teks biasa. Jangan tambahkan emoji. Langsung tulis kata-katanya saja tanpa judul.`;
+Gunakan bahasa yang sangat puitis, dalam, penuh perasaan. Jangan gunakan markdown, format khusus, atau emoji. Cukup teks biasa saja. Langsung tulis pesannya tanpa judul atau keterangan tambahan.`;
 
     let lastError = '';
 
@@ -69,8 +130,8 @@ Gunakan bahasa yang puitis, romantis, dan menyentuh hati. Jangan gunakan markdow
                         }
                     ],
                     generationConfig: {
-                        temperature: 0.9,
-                        maxOutputTokens: 500
+                        temperature: 1.0,
+                        maxOutputTokens: 600
                     }
                 })
             });
@@ -79,18 +140,19 @@ Gunakan bahasa yang puitis, romantis, dan menyentuh hati. Jangan gunakan markdow
                 const errData = await response.json().catch(() => ({}));
                 lastError = `Model ${model}: ${response.status} - ${errData.error?.message || 'Unknown error'}`;
                 console.warn(lastError);
-                continue; // Try next model
+                continue;
             }
 
             const data = await response.json();
             
             if (data.candidates && data.candidates[0] && data.candidates[0].content) {
                 const text = data.candidates[0].content.parts[0].text;
-                romanticMessage.textContent = text;
                 
+                // Typing effect
                 loading.classList.add('hidden');
                 messageContainer.classList.remove('hidden');
-                return; // Success!
+                await typeWriter(romanticMessage, text);
+                return;
             } else {
                 lastError = `Model ${model}: Response tidak valid`;
                 continue;
@@ -110,5 +172,14 @@ Gunakan bahasa yang puitis, romantis, dan menyentuh hati. Jangan gunakan markdow
     errorContainer.classList.remove('hidden');
 }
 
-// Start generating when page loads
-generateRomanticMessage();
+// Typing effect
+async function typeWriter(element, text) {
+    element.textContent = '';
+    const chars = text.split('');
+    
+    for (let i = 0; i < chars.length; i++) {
+        element.textContent += chars[i];
+        // Speed: fast but still visible
+        await new Promise(resolve => setTimeout(resolve, 20));
+    }
+}

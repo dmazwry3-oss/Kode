@@ -5,62 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bucin Romantis - Generator Kata Cinta</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Satisfy&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+    
     <div class="container">
-        <div class="hearts-bg">
-            <span class="heart">&#10084;</span>
-            <span class="heart">&#10084;</span>
-            <span class="heart">&#10084;</span>
-            <span class="heart">&#10084;</span>
-            <span class="heart">&#10084;</span>
-            <span class="heart">&#10084;</span>
-            <span class="heart">&#10084;</span>
-            <span class="heart">&#10084;</span>
-        </div>
-        
-        <div class="card">
-            <h1 class="title">Bucin Romantis</h1>
-            <p class="subtitle">Buat kata-kata cinta spesial untuk orang tersayang</p>
+        <div class="card glass-card">
+            <div class="card-glow"></div>
             
-            <div class="form-group">
-                <label for="apiKey">API Key Gemini</label>
-                <input type="password" id="apiKey" placeholder="Masukkan API Key Gemini..." />
-                <small style="color:#999; font-size:0.75rem;">API key disimpan di browser kamu saja, aman!</small>
+            <div class="logo-section">
+                <div class="heart-beat">&#128140;</div>
+                <h1 class="title">Bucin Romantis</h1>
+                <p class="subtitle">Kirim pesan cinta spesial yang bikin baper</p>
             </div>
+            
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="apiKey">
+                        <span class="label-icon">&#128273;</span> API Key Gemini
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="password" id="apiKey" placeholder="Masukkan API Key..." />
+                        <button class="toggle-eye" onclick="toggleApiKey()" id="eyeBtn">&#128065;</button>
+                    </div>
+                    <small class="hint">Disimpan di browser kamu saja, aman!</small>
+                </div>
 
-            <div class="form-group">
-                <label for="nama">Nama Pasangan</label>
-                <input type="text" id="nama" placeholder="Masukkan nama dia..." />
+                <div class="form-group">
+                    <label for="pengirim">
+                        <span class="label-icon">&#128100;</span> Nama Pengirim (Kamu)
+                    </label>
+                    <input type="text" id="pengirim" placeholder="Nama kamu..." />
+                </div>
+
+                <div class="form-group">
+                    <label for="nama">
+                        <span class="label-icon">&#128149;</span> Nama Dia
+                    </label>
+                    <input type="text" id="nama" placeholder="Nama orang yang kamu sayang..." />
+                </div>
+                
+                <div class="form-group">
+                    <label for="hubungan">
+                        <span class="label-icon">&#128146;</span> Hubungan
+                    </label>
+                    <select id="hubungan">
+                        <option value="">-- Pilih Hubungan --</option>
+                        <option value="pacar">&#128150; Pacar</option>
+                        <option value="suami">&#128141; Suami</option>
+                        <option value="istri">&#128141; Istri</option>
+                        <option value="gebetan">&#128536; Gebetan</option>
+                        <option value="mantan">&#128148; Mantan</option>
+                        <option value="sahabat">&#127775; Sahabat Spesial</option>
+                        <option value="crush">&#129505; Crush</option>
+                    </select>
+                </div>
+                
+                <button id="generateBtn" onclick="generateLink()">
+                    <span class="btn-sparkle">&#10024;</span>
+                    <span>Buat Pesan Cinta</span>
+                    <span class="btn-sparkle">&#10024;</span>
+                </button>
             </div>
-            
-            <div class="form-group">
-                <label for="hubungan">Hubungan</label>
-                <select id="hubungan">
-                    <option value="">-- Pilih Hubungan --</option>
-                    <option value="pacar">Pacar</option>
-                    <option value="suami">Suami</option>
-                    <option value="istri">Istri</option>
-                    <option value="gebetan">Gebetan</option>
-                    <option value="mantan">Mantan</option>
-                    <option value="sahabat">Sahabat Spesial</option>
-                </select>
-            </div>
-            
-            <button id="generateBtn" onclick="generateLink()">
-                <span class="btn-icon">&#10084;</span> Buat Link Romantis
-            </button>
             
             <div id="result" class="result hidden">
-                <p class="result-text">Link spesial untuk <strong id="resultNama"></strong>:</p>
+                <div class="result-header">
+                    <span>&#127881;</span> Link sudah jadi untuk <strong id="resultNama"></strong>!
+                </div>
                 <div class="link-box">
                     <a id="generatedLink" href="#" target="_blank"></a>
-                    <button class="copy-btn" onclick="copyLink()">Salin</button>
                 </div>
-                <p id="copyNotif" class="copy-notif hidden">Link berhasil disalin!</p>
+                <div class="result-actions">
+                    <button class="copy-btn" onclick="copyLink()">
+                        <span>&#128203;</span> Salin Link
+                    </button>
+                    <button class="share-btn" onclick="shareLink()">
+                        <span>&#128172;</span> Share
+                    </button>
+                </div>
+                <p id="copyNotif" class="copy-notif hidden">&#10004; Link berhasil disalin!</p>
             </div>
         </div>
+        
+        <p class="footer-text">Made with &#10084;&#65039; by Bucin Romantis</p>
     </div>
 
     <script src="app.js"></script>
