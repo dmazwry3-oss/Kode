@@ -1,8 +1,8 @@
 // dmaz alyxers - media extraction serverless function
-// Uses btch-downloader to resolve direct media links from social platforms.
+// Resolves direct media links from social platforms and attaches real file sizes
+// so users can pick the lightest option (saves memory / data).
 const btch = require("btch-downloader");
 
-// Map a platform key -> handler function from btch-downloader
 const HANDLERS = {
   tiktok: btch.ttdl,
   youtube: btch.youtube,
@@ -17,7 +17,6 @@ const HANDLERS = {
   soundcloud: btch.soundcloud,
 };
 
-// Guess the platform from a URL when the user picks "Auto".
 function detectPlatform(url) {
   const u = url.toLowerCase();
   if (/tiktok\.com|vt\.tiktok|vm\.tiktok/.test(u)) return "tiktok";
@@ -42,57 +41,48 @@ function kindFromKey(key, url) {
   const k = (key || "").toLowerCase();
   if (AUDIO_EXT.test(url) || /(mp3|audio|music|sound)/.test(k)) return "audio";
   if (IMAGE_EXT.test(url) || /(thumb|image|cover|photo|picture)/.test(k)) return "image";
-  if (VIDEO_EXT.test(url) || /(mp4|video|hd|sd|sound_quality|nowatermark|no_watermark|play|hdplay)/.test(k))
-    return "video";
+  if (VIDEO_EXT.test(url) || /(mp4|video|hd|sd|nowatermark|no_watermark|play|hdplay)/.test(k)) return "video";
   if (/(url|link|download|dl)/.test(k)) return "video";
   return "video";
 }
 
-function prettyLabel(key, kind) {
-  const map = {
-    hdplay: "Video HD (no watermark)",
-    play: "Video (no watermark)",
-    wmplay: "Video (watermark)",
-    nowatermark: "Video (no watermark)",
-    no_watermark: "Video (no watermark)",
-    nowatermark_hd: "Video HD (no watermark)",
-    normal_video: "Video SD",
-    hd: "Video HD",
-    sd: "Video SD",
-    mp4: "Video MP4",
-    mp3: "Audio MP3",
-    music: "Audio MP3",
-    audio: "Audio",
-  };
+// Infer a quality label from the key name.
+function qualityFromKey(key) {
   const k = (key || "").toLowerCase();
-  if (map[k]) return map[k];
-  if (kind === "audio") return "Audio MP3";
-  if (kind === "image") return "Image";
-  if (kind === "video") return "Video";
-  return key || "Download";
+  if (/hdplay|_hd|hd$|^hd|nowatermark_hd/.test(k)) return "HD";
+  if (/normal_video|wmplay|sd|low/.test(k)) return "SD";
+  return null;
 }
 
-// Recursively walk any JSON returned by btch-downloader and collect media links.
+function baseLabel(key, kind) {
+  const k = (key || "").toLowerCase();
+  if (kind === "audio") return "Audio MP3";
+  if (kind === "image") return "Gambar / Thumbnail";
+  if (/nowatermark|no_watermark|^play$|hdplay/.test(k)) return "Video tanpa watermark";
+  if (/wmplay/.test(k)) return "Video (watermark)";
+  return "Video";
+}
+
 function collectMedia(node, results, keyHint, depth = 0) {
   if (node == null || depth > 6) return;
-
   if (typeof node === "string") {
     if (/^https?:\/\//i.test(node) && !/^https?:\/\/\S*\.(html|php)$/i.test(node)) {
       const kind = kindFromKey(keyHint, node);
-      results.push({ label: prettyLabel(keyHint, kind), url: node, kind });
+      results.push({
+        label: baseLabel(keyHint, kind),
+        url: node,
+        kind,
+        quality: qualityFromKey(keyHint),
+      });
     }
     return;
   }
-
   if (Array.isArray(node)) {
     node.forEach((item) => collectMedia(item, results, keyHint, depth + 1));
     return;
   }
-
   if (typeof node === "object") {
-    for (const [key, val] of Object.entries(node)) {
-      collectMedia(val, results, key, depth + 1);
-    }
+    for (const [key, val] of Object.entries(node)) collectMedia(val, results, key, depth + 1);
   }
 }
 
@@ -103,12 +93,10 @@ function extractMeta(data) {
     for (const [k, v] of Object.entries(obj)) {
       const key = k.toLowerCase();
       if (typeof v === "string") {
-        if (!meta.title && /(title|caption|desc)/.test(key) && v.length > 1) meta.title = v;
-        if (!meta.thumbnail && /(thumb|cover|image)/.test(key) && /^https?:/.test(v)) meta.thumbnail = v;
+        if (!meta.title && /(^title$|caption|desc)/.test(key) && v.length > 1 && !/audio/.test(key)) meta.title = v;
+        if (!meta.thumbnail && /(thumb|cover|^image$)/.test(key) && /^https?:/.test(v)) meta.thumbnail = v;
         if (!meta.author && /(author|nickname|username|owner|creator)/.test(key)) meta.author = v;
-      } else if (typeof v === "object") {
-        scan(v, d + 1);
-      }
+      } else if (typeof v === "object") scan(v, d + 1);
     }
   };
   scan(data);
@@ -117,11 +105,59 @@ function extractMeta(data) {
 
 function dedupe(items) {
   const seen = new Set();
-  return items.filter((it) => {
-    if (seen.has(it.url)) return false;
-    seen.add(it.url);
-    return true;
-  });
+  return items.filter((it) => (seen.has(it.url) ? false : seen.add(it.url)));
+}
+
+function humanSize(bytes) {
+  if (bytes == null || isNaN(bytes) || bytes <= 0) return null;
+  const u = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let n = bytes;
+  while (n >= 1024 && i < u.length - 1) {
+    n /= 1024;
+    i++;
+  }
+  return (n >= 10 || i === 0 ? Math.round(n) : n.toFixed(1)) + " " + u[i];
+}
+
+// Probe the byte size + real content-type of a URL (HEAD, then ranged GET fallback).
+async function probe(url) {
+  const withTimeout = (ms) => {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), ms);
+    return { signal: c.signal, done: () => clearTimeout(t) };
+  };
+  // HEAD
+  try {
+    const t = withTimeout(6000);
+    const r = await fetch(url, { method: "HEAD", redirect: "follow", signal: t.signal });
+    t.done();
+    const len = r.headers.get("content-length");
+    const ct = r.headers.get("content-type") || "";
+    if (len) return { size: Number(len), contentType: ct };
+    if (ct) return { size: null, contentType: ct };
+  } catch (_) {}
+  // Ranged GET fallback
+  try {
+    const t = withTimeout(6000);
+    const r = await fetch(url, { method: "GET", headers: { Range: "bytes=0-1" }, redirect: "follow", signal: t.signal });
+    t.done();
+    const cr = r.headers.get("content-range");
+    const ct = r.headers.get("content-type") || "";
+    if (cr && cr.includes("/")) return { size: Number(cr.split("/").pop()), contentType: ct };
+    const len = r.headers.get("content-length");
+    return { size: len ? Number(len) : null, contentType: ct };
+  } catch (_) {
+    return { size: null, contentType: "" };
+  }
+}
+
+function refineKind(item, contentType) {
+  const ct = (contentType || "").toLowerCase();
+  if (ct.startsWith("audio/")) return "audio";
+  if (ct.startsWith("image/")) return "image";
+  if (ct.startsWith("video/")) return "video";
+  return item.kind;
 }
 
 exports.handler = async (event) => {
@@ -132,12 +168,8 @@ exports.handler = async (event) => {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers, body: "" };
-  }
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
-  }
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers, body: "" };
+  if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
 
   let url, platform;
   try {
@@ -149,40 +181,67 @@ exports.handler = async (event) => {
   }
 
   if (!url || !/^https?:\/\//i.test(url)) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: "Masukkan URL yang valid (harus diawali http/https)." }) };
+    return { statusCode: 400, headers, body: JSON.stringify({ error: "Masukkan URL yang valid (diawali http/https)." }) };
   }
 
   if (platform === "auto") platform = detectPlatform(url);
 
-  // Build the list of handlers to try (chosen platform first, then aio fallback).
   const order = [];
   if (HANDLERS[platform]) order.push([platform, HANDLERS[platform]]);
-  order.push(["aio", btch.aio]);
+  if (platform !== "auto") order.push(["aio", btch.aio]);
 
   let lastError = null;
   for (const [name, fn] of order) {
     try {
       const data = await fn(url);
+      if (data && (data.error || data.mess) && (!data.status || data.status === false)) {
+        lastError = data.error || data.mess;
+        continue;
+      }
       const media = [];
       collectMedia(data, media);
-      const cleaned = dedupe(media);
-      if (cleaned.length > 0) {
-        const meta = extractMeta(data);
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            success: true,
-            platform: platform === "auto" ? name : platform,
-            resolver: name,
-            title: meta.title,
-            thumbnail: meta.thumbnail,
-            author: meta.author,
-            media: cleaned,
-          }),
-        };
+      let cleaned = dedupe(media);
+      if (cleaned.length === 0) {
+        lastError = "Tidak ada media yang ditemukan dari link ini.";
+        continue;
       }
-      lastError = "Tidak ada media yang ditemukan dari link ini.";
+
+      // Probe sizes (cap to avoid long cold-start; media lists are usually small).
+      const toProbe = cleaned.slice(0, 10);
+      const probes = await Promise.allSettled(toProbe.map((it) => probe(it.url)));
+      probes.forEach((p, i) => {
+        if (p.status === "fulfilled" && p.value) {
+          const { size, contentType } = p.value;
+          toProbe[i].size = size != null ? size : null;
+          toProbe[i].sizeText = humanSize(size);
+          toProbe[i].kind = refineKind(toProbe[i], contentType);
+        }
+      });
+
+      const meta = extractMeta(data);
+
+      // Sort: video first, then audio, then image. Within video, smallest size first
+      // so the "lightest" option is easy to find.
+      const rank = { video: 0, audio: 1, image: 2 };
+      cleaned.sort((a, b) => {
+        const r = (rank[a.kind] ?? 3) - (rank[b.kind] ?? 3);
+        if (r !== 0) return r;
+        if (a.size != null && b.size != null) return a.size - b.size;
+        return 0;
+      });
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          platform: name === "aio" ? platform : name,
+          title: meta.title,
+          thumbnail: meta.thumbnail,
+          author: meta.author,
+          media: cleaned,
+        }),
+      };
     } catch (e) {
       lastError = e && e.message ? e.message : "Gagal memproses link.";
     }
@@ -193,7 +252,7 @@ exports.handler = async (event) => {
     headers,
     body: JSON.stringify({
       success: false,
-      error: "Tidak dapat mengambil media. " + (lastError || "") + " Coba platform lain atau periksa apakah video bersifat publik.",
+      error: "Tidak dapat mengambil media. " + (lastError || "") + " Coba platform lain atau pastikan video bersifat publik.",
     }),
   };
 };

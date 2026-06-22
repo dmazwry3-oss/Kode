@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="dmaz alyxers - Download video & audio dari TikTok, YouTube, Facebook, Instagram, CapCut dan banyak lagi. Gratis, cepat, tanpa watermark." />
+  <meta name="description" content="dmaz alyxers - Download video & audio dari TikTok, YouTube, Facebook, Instagram, CapCut dan lainnya. Pilih resolusi & ukuran file untuk hemat memori." />
+  <meta name="theme-color" content="#0a0a14" />
   <title>dmaz alyxers — Video & Audio Downloader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%AC%87%EF%B8%8F%3C/text%3E%3C/svg%3E" />
 </head>
@@ -16,6 +17,7 @@
     <span class="orb orb-1"></span>
     <span class="orb orb-2"></span>
     <span class="orb orb-3"></span>
+    <span class="grid-overlay"></span>
   </div>
 
   <header class="topbar">
@@ -23,97 +25,133 @@
       <span class="brand-mark">⬇</span>
       <div class="brand-text">
         <strong>dmaz<span> alyxers</span></strong>
-        <small>video & audio downloader</small>
+        <small>video &amp; audio downloader</small>
       </div>
     </div>
     <nav class="topnav">
       <a href="#platforms">Platform</a>
       <a href="#how">Cara Pakai</a>
+      <a href="#faq">FAQ</a>
     </nav>
   </header>
 
   <main class="container">
     <section class="hero">
-      <span class="pill">Gratis • Cepat • Tanpa Watermark</span>
-      <h1>Download Video & Audio dari Semua Platform</h1>
+      <span class="pill"><span class="dot"></span> Gratis • Tanpa watermark • Pilih ukuran file</span>
+      <h1>Unduh video &amp; audio dari<br />semua platform favoritmu</h1>
       <p class="subtitle">
-        Tempel link dari TikTok, YouTube, Facebook, Instagram, atau CapCut.
-        Pilih format MP4 atau MP3, lalu unduh dalam sekali klik.
+        Tempel link dari TikTok, YouTube, Facebook, Instagram, atau CapCut. Pilih
+        <strong>MP4 / MP3</strong>, lihat <strong>ukuran file tiap opsi</strong>, dan pakai
+        mode <strong>Hemat Memori</strong> untuk file paling ringan.
       </p>
 
       <form id="dl-form" class="downloader">
         <div class="input-row">
-          <input
-            id="url"
-            type="url"
-            inputmode="url"
-            placeholder="Tempel link video di sini…"
-            autocomplete="off"
-            required
-          />
+          <span class="input-icon">🔗</span>
+          <input id="url" type="url" inputmode="url" placeholder="Tempel link video di sini…" autocomplete="off" required />
           <button type="button" id="paste-btn" class="ghost-btn" title="Tempel dari clipboard">Tempel</button>
+          <button type="button" id="clear-btn" class="icon-btn" title="Bersihkan" hidden>✕</button>
         </div>
 
         <div class="controls">
-          <label class="select-wrap">
-            <span>Platform</span>
-            <select id="platform">
-              <option value="auto">Deteksi otomatis</option>
-              <option value="tiktok">TikTok</option>
-              <option value="youtube">YouTube</option>
-              <option value="facebook">Facebook</option>
-              <option value="instagram">Instagram</option>
-              <option value="capcut">CapCut</option>
-              <option value="twitter">Twitter / X</option>
-              <option value="pinterest">Pinterest</option>
-              <option value="douyin">Douyin</option>
-              <option value="threads">Threads</option>
-            </select>
-          </label>
-
-          <div class="format-toggle" role="group" aria-label="Format">
-            <input type="radio" name="format" id="fmt-all" value="all" checked />
-            <label for="fmt-all">Semua</label>
-            <input type="radio" name="format" id="fmt-mp4" value="mp4" />
-            <label for="fmt-mp4">MP4</label>
-            <input type="radio" name="format" id="fmt-mp3" value="mp3" />
-            <label for="fmt-mp3">MP3</label>
+          <div class="control-group">
+            <label class="control-label" for="platform">Platform</label>
+            <div class="select-shell">
+              <select id="platform">
+                <option value="auto">✨ Deteksi otomatis</option>
+                <option value="tiktok">TikTok</option>
+                <option value="youtube">YouTube</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="capcut">CapCut</option>
+                <option value="twitter">Twitter / X</option>
+                <option value="pinterest">Pinterest</option>
+                <option value="douyin">Douyin</option>
+                <option value="threads">Threads</option>
+              </select>
+            </div>
           </div>
 
-          <button type="submit" id="go-btn" class="primary-btn">
-            <span class="btn-label">Download</span>
-            <span class="spinner" hidden></span>
-          </button>
-        </div>
-      </form>
+          <div class="control-group">
+            <span class="control-label">Format</span>
+            <div class="segmented" role="group" aria-label="Format">
+              <input type="radio" name="format" id="fmt-all" value="all" checked />
+              <label for="fmt-all">Semua</label>
+              <input type="radio" name="format" id="fmt-mp4" value="mp4" />
+              <label for="fmt-mp4">🎬 MP4</label>
+              <input type="radio" name="format" id="fmt-mp3" value="mp3" />
+              <label for="fmt-mp3">🎵 MP3</label>
+            </div>
+          </div>
 
-      <p class="hint">Contoh: https://www.tiktok.com/@user/video/123…</p>
+          <div class="control-group">
+            <span class="control-label">Kualitas / Ukuran</span>
+            <div class="segmented" role="group" aria-label="Kualitas">
+              <input type="radio" name="quality" id="q-auto" value="auto" checked />
+              <label for="q-auto">Otomatis</label>
+              <input type="radio" name="quality" id="q-hd" value="hd" />
+              <label for="q-hd">⬆ HD</label>
+              <input type="radio" name="quality" id="q-lite" value="lite" />
+              <label for="q-lite">🪶 Hemat</label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="go-btn" class="primary-btn">
+          <span class="spinner" hidden></span>
+          <span class="btn-label">Download Sekarang</span>
+        </button>
+        <p class="hint" id="quality-hint">Mode <strong>Hemat</strong> mengutamakan file paling kecil supaya tidak memakan memori.</p>
+      </form>
+    </section>
+
+    <!-- Loading skeleton -->
+    <section id="skeleton" class="result" hidden>
+      <div class="result-card skeleton-card">
+        <div class="sk sk-thumb"></div>
+        <div class="sk-info">
+          <div class="sk sk-line w70"></div>
+          <div class="sk sk-line w40"></div>
+          <div class="sk sk-row"></div>
+          <div class="sk sk-row"></div>
+        </div>
+      </div>
     </section>
 
     <section id="result" class="result" hidden>
       <div class="result-card">
         <div class="result-media">
           <img id="thumb" alt="thumbnail" />
+          <span class="media-tag" id="platform-tag"></span>
         </div>
         <div class="result-info">
-          <h3 id="title">Memproses…</h3>
+          <h3 id="title">Media siap diunduh</h3>
           <p id="author" class="author"></p>
+
+          <div class="lite-banner" id="lite-banner" hidden>
+            🪶 <span></span>
+          </div>
+
           <div id="links" class="links"></div>
         </div>
       </div>
     </section>
 
-    <div id="alert" class="alert" hidden></div>
+    <div id="alert" class="alert" hidden>
+      <span class="alert-icon">⚠️</span>
+      <span id="alert-text"></span>
+    </div>
 
     <section id="platforms" class="platforms">
       <h2>Platform yang didukung</h2>
+      <p class="section-sub">Satu alat untuk semua. Tinggal tempel linknya.</p>
       <div class="platform-grid">
         <div class="platform"><span>🎵</span>TikTok</div>
         <div class="platform"><span>▶️</span>YouTube</div>
         <div class="platform"><span>📘</span>Facebook</div>
         <div class="platform"><span>📸</span>Instagram</div>
         <div class="platform"><span>✂️</span>CapCut</div>
-        <div class="platform"><span>𝕏</span>Twitter</div>
+        <div class="platform"><span>𝕏</span>Twitter / X</div>
         <div class="platform"><span>📌</span>Pinterest</div>
         <div class="platform"><span>🧵</span>Threads</div>
       </div>
@@ -121,16 +159,32 @@
 
     <section id="how" class="how">
       <h2>Cara pakai</h2>
-      <ol>
-        <li><strong>Salin link</strong> video dari aplikasi atau browser.</li>
-        <li><strong>Tempel</strong> di kolom di atas dan pilih format (MP4/MP3).</li>
-        <li><strong>Klik Download</strong> lalu pilih kualitas yang muncul.</li>
-      </ol>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div><strong>Salin link</strong><p>Ambil link video dari aplikasi atau browser.</p></div></div>
+        <div class="step"><span class="step-num">2</span><div><strong>Tempel &amp; atur</strong><p>Pilih format MP4/MP3 dan mode Hemat bila perlu.</p></div></div>
+        <div class="step"><span class="step-num">3</span><div><strong>Pilih ukuran &amp; unduh</strong><p>Lihat ukuran tiap opsi, klik yang paling ringan.</p></div></div>
+      </div>
+    </section>
+
+    <section id="faq" class="faq">
+      <h2>Tentang resolusi &amp; ukuran file</h2>
+      <details>
+        <summary>Bagaimana cara menghemat memori?</summary>
+        <p>Setiap opsi unduhan menampilkan ukuran file aslinya. Gunakan mode <strong>Hemat</strong> untuk menyorot file terkecil, atau pilih <strong>MP3</strong> (audio saja) yang ukurannya jauh lebih kecil daripada video.</p>
+      </details>
+      <details>
+        <summary>Apakah video bisa dikompres ke resolusi lebih rendah?</summary>
+        <p>Bila platform menyediakan beberapa kualitas (mis. Facebook HD/SD), semua pilihan akan ditampilkan beserta ukurannya sehingga kamu bisa memilih yang lebih kecil. Untuk kompres/re-encode penuh ke resolusi khusus, gunakan aplikasi editor di perangkatmu setelah mengunduh.</p>
+      </details>
+      <details>
+        <summary>Kenapa kadang hanya ada satu kualitas?</summary>
+        <p>Beberapa platform hanya menyediakan satu sumber video publik. Dalam kasus itu, memilih MP3 adalah cara tercepat untuk menghemat ruang.</p>
+      </details>
     </section>
   </main>
 
   <footer class="footer">
-    <p>© <span id="year"></span> dmaz alyxers. Gunakan hanya untuk konten yang Anda miliki haknya atau yang diizinkan untuk diunduh.</p>
+    <p>© <span id="year"></span> <strong>dmaz alyxers</strong> — gunakan hanya untuk konten yang kamu miliki haknya atau yang diizinkan untuk diunduh.</p>
   </footer>
 
   <script src="app.js"></script>
