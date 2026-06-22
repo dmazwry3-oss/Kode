@@ -15,31 +15,45 @@ const HANDLERS = {
   threads: btch.threads,
   spotify: btch.spotify,
   soundcloud: btch.soundcloud,
+  mediafire: btch.mediafire,
+  gdrive: btch.gdrive,
+  xiaohongshu: btch.xiaohongshu,
+  snackvideo: btch.snackvideo,
+  cocofun: btch.cocofun,
+  kuaishou: btch.kuaishou,
 };
 
 // Guess the platform from a URL when the user picks "Auto".
 function detectPlatform(url) {
   const u = url.toLowerCase();
   if (/tiktok\.com|vt\.tiktok|vm\.tiktok/.test(u)) return "tiktok";
-  if (/youtube\.com|youtu\.be/.test(u)) return "youtube";
-  if (/facebook\.com|fb\.watch|fb\.me/.test(u)) return "facebook";
+  if (/youtube\.com|youtu\.be|youtube-nocookie/.test(u)) return "youtube";
+  if (/facebook\.com|fb\.watch|fb\.me|fb\.com/.test(u)) return "facebook";
   if (/instagram\.com|instagr\.am/.test(u)) return "instagram";
   if (/capcut\.com/.test(u)) return "capcut";
   if (/twitter\.com|x\.com|t\.co/.test(u)) return "twitter";
   if (/pinterest\.|pin\.it/.test(u)) return "pinterest";
-  if (/douyin\.com/.test(u)) return "douyin";
-  if (/threads\.net/.test(u)) return "threads";
+  if (/douyin\.com|v\.douyin/.test(u)) return "douyin";
+  if (/threads\.net|threads\.com/.test(u)) return "threads";
   if (/spotify\.com/.test(u)) return "spotify";
-  if (/soundcloud\.com/.test(u)) return "soundcloud";
+  if (/soundcloud\.com|snd\.sc/.test(u)) return "soundcloud";
+  if (/mediafire\.com/.test(u)) return "mediafire";
+  if (/drive\.google\.com|docs\.google\.com/.test(u)) return "gdrive";
+  if (/xiaohongshu\.com|xhslink\.com/.test(u)) return "xiaohongshu";
+  if (/snackvideo\.com|sck\.io/.test(u)) return "snackvideo";
+  if (/icocofun\.com|cocofun/.test(u)) return "cocofun";
+  if (/kuaishou\.com|v\.kuaishou|chenzhongtech/.test(u)) return "kuaishou";
   return "auto";
 }
 
-const VIDEO_EXT = /\.(mp4|mov|webm|mkv|m3u8)(\?|$)/i;
-const AUDIO_EXT = /\.(mp3|m4a|aac|ogg|wav|opus)(\?|$)/i;
-const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)(\?|$)/i;
+const VIDEO_EXT = /\.(mp4|mov|webm|mkv|m3u8|ts)(\?|$)/i;
+const AUDIO_EXT = /\.(mp3|m4a|aac|ogg|wav|opus|flac)(\?|$)/i;
+const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif|heic)(\?|$)/i;
+const FILE_EXT = /\.(apk|zip|rar|7z|pdf|doc|docx|xls|xlsx|ppt|pptx|exe|dmg|iso)(\?|$)/i;
 
 function kindFromKey(key, url) {
   const k = (key || "").toLowerCase();
+  if (FILE_EXT.test(url)) return "file";
   if (AUDIO_EXT.test(url) || /(mp3|audio|music|sound)/.test(k)) return "audio";
   if (IMAGE_EXT.test(url) || /(thumb|image|cover|photo|picture)/.test(k)) return "image";
   if (VIDEO_EXT.test(url) || /(mp4|video|hd|sd|sound_quality|nowatermark|no_watermark|play|hdplay)/.test(k))
@@ -50,12 +64,12 @@ function kindFromKey(key, url) {
 
 function prettyLabel(key, kind) {
   const map = {
-    hdplay: "Video HD (no watermark)",
-    play: "Video (no watermark)",
-    wmplay: "Video (watermark)",
-    nowatermark: "Video (no watermark)",
-    no_watermark: "Video (no watermark)",
-    nowatermark_hd: "Video HD (no watermark)",
+    hdplay: "Video HD (tanpa watermark)",
+    play: "Video (tanpa watermark)",
+    wmplay: "Video (dengan watermark)",
+    nowatermark: "Video (tanpa watermark)",
+    no_watermark: "Video (tanpa watermark)",
+    nowatermark_hd: "Video HD (tanpa watermark)",
     normal_video: "Video SD",
     hd: "Video HD",
     sd: "Video SD",
@@ -63,11 +77,13 @@ function prettyLabel(key, kind) {
     mp3: "Audio MP3",
     music: "Audio MP3",
     audio: "Audio",
+    download: "Unduh file",
   };
   const k = (key || "").toLowerCase();
   if (map[k]) return map[k];
   if (kind === "audio") return "Audio MP3";
-  if (kind === "image") return "Image";
+  if (kind === "image") return "Gambar";
+  if (kind === "file") return "Unduh file";
   if (kind === "video") return "Video";
   return key || "Download";
 }
@@ -103,9 +119,9 @@ function extractMeta(data) {
     for (const [k, v] of Object.entries(obj)) {
       const key = k.toLowerCase();
       if (typeof v === "string") {
-        if (!meta.title && /(title|caption|desc)/.test(key) && v.length > 1) meta.title = v;
+        if (!meta.title && /(title|caption|desc|filename|name)/.test(key) && v.length > 1 && !/^https?:/.test(v)) meta.title = v;
         if (!meta.thumbnail && /(thumb|cover|image)/.test(key) && /^https?:/.test(v)) meta.thumbnail = v;
-        if (!meta.author && /(author|nickname|username|owner|creator)/.test(key)) meta.author = v;
+        if (!meta.author && /(author|nickname|username|owner|creator|artist)/.test(key)) meta.author = v;
       } else if (typeof v === "object") {
         scan(v, d + 1);
       }

@@ -9,6 +9,12 @@
   to = "/.netlify/functions/download"
   status = 200
 
+# YouTube search endpoint
+[[redirects]]
+  from = "/api/search"
+  to = "/.netlify/functions/search"
+  status = 200
+
 # SPA-style fallback so the homepage always loads
 [[redirects]]
   from = "/*"
