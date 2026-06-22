@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="dmaz alyxers - Download video & audio dari TikTok, YouTube, Facebook, Instagram, CapCut dan banyak lagi. Gratis, cepat, tanpa watermark." />
+  <title>dmaz alyxers — Video & Audio Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%AC%87%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">⬇</span>
+      <div class="brand-text">
+        <strong>dmaz<span> alyxers</span></strong>
+        <small>video & audio downloader</small>
+      </div>
+    </div>
+    <nav class="topnav">
+      <a href="#platforms">Platform</a>
+      <a href="#how">Cara Pakai</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <span class="pill">Gratis • Cepat • Tanpa Watermark</span>
+      <h1>Download Video & Audio dari Semua Platform</h1>
+      <p class="subtitle">
+        Tempel link dari TikTok, YouTube, Facebook, Instagram, atau CapCut.
+        Pilih format MP4 atau MP3, lalu unduh dalam sekali klik.
+      </p>
+
+      <form id="dl-form" class="downloader">
+        <div class="input-row">
+          <input
+            id="url"
+            type="url"
+            inputmode="url"
+            placeholder="Tempel link video di sini…"
+            autocomplete="off"
+            required
+          />
+          <button type="button" id="paste-btn" class="ghost-btn" title="Tempel dari clipboard">Tempel</button>
+        </div>
+
+        <div class="controls">
+          <label class="select-wrap">
+            <span>Platform</span>
+            <select id="platform">
+              <option value="auto">Deteksi otomatis</option>
+              <option value="tiktok">TikTok</option>
+              <option value="youtube">YouTube</option>
+              <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
+              <option value="capcut">CapCut</option>
+              <option value="twitter">Twitter / X</option>
+              <option value="pinterest">Pinterest</option>
+              <option value="douyin">Douyin</option>
+              <option value="threads">Threads</option>
+            </select>
+          </label>
+
+          <div class="format-toggle" role="group" aria-label="Format">
+            <input type="radio" name="format" id="fmt-all" value="all" checked />
+            <label for="fmt-all">Semua</label>
+            <input type="radio" name="format" id="fmt-mp4" value="mp4" />
+            <label for="fmt-mp4">MP4</label>
+            <input type="radio" name="format" id="fmt-mp3" value="mp3" />
+            <label for="fmt-mp3">MP3</label>
+          </div>
+
+          <button type="submit" id="go-btn" class="primary-btn">
+            <span class="btn-label">Download</span>
+            <span class="spinner" hidden></span>
+          </button>
+        </div>
+      </form>
+
+      <p class="hint">Contoh: https://www.tiktok.com/@user/video/123…</p>
+    </section>
+
+    <section id="result" class="result" hidden>
+      <div class="result-card">
+        <div class="result-media">
+          <img id="thumb" alt="thumbnail" />
+        </div>
+        <div class="result-info">
+          <h3 id="title">Memproses…</h3>
+          <p id="author" class="author"></p>
+          <div id="links" class="links"></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="alert" class="alert" hidden></div>
+
+    <section id="platforms" class="platforms">
+      <h2>Platform yang didukung</h2>
+      <div class="platform-grid">
+        <div class="platform"><span>🎵</span>TikTok</div>
+        <div class="platform"><span>▶️</span>YouTube</div>
+        <div class="platform"><span>📘</span>Facebook</div>
+        <div class="platform"><span>📸</span>Instagram</div>
+        <div class="platform"><span>✂️</span>CapCut</div>
+        <div class="platform"><span>𝕏</span>Twitter</div>
+        <div class="platform"><span>📌</span>Pinterest</div>
+        <div class="platform"><span>🧵</span>Threads</div>
+      </div>
+    </section>
+
+    <section id="how" class="how">
+      <h2>Cara pakai</h2>
+      <ol>
+        <li><strong>Salin link</strong> video dari aplikasi atau browser.</li>
+        <li><strong>Tempel</strong> di kolom di atas dan pilih format (MP4/MP3).</li>
+        <li><strong>Klik Download</strong> lalu pilih kualitas yang muncul.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> dmaz alyxers. Gunakan hanya untuk konten yang Anda miliki haknya atau yang diizinkan untuk diunduh.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

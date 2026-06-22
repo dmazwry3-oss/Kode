@@ -1,0 +1,16 @@
+{
+  "name": "dmaz-alyxers",
+  "version": "1.0.0",
+  "description": "dmaz alyxers - Multi-platform video & audio downloader (TikTok, YouTube, Facebook, Instagram, CapCut and more)",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "btch-downloader": "^6.0.35"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
