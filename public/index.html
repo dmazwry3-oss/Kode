@@ -2,9 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="dmaz alyxers - Download video & audio dari TikTok, YouTube, Facebook, Instagram, CapCut dan banyak lagi. Gratis, cepat, tanpa watermark." />
-  <title>dmaz alyxers — Video & Audio Downloader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0" />
+  <meta name="theme-color" content="#0a0a14" />
+  <meta name="description" content="dmaz alyxers - Download video & audio dari TikTok, YouTube, Facebook, Instagram, CapCut, Spotify, dan banyak lagi. Gratis, cepat, tanpa watermark." />
+  <title>dmaz alyxers - Video & Audio Downloader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -23,10 +24,11 @@
       <span class="brand-mark">⬇</span>
       <div class="brand-text">
         <strong>dmaz<span> alyxers</span></strong>
-        <small>video & audio downloader</small>
+        <small>video &amp; audio downloader</small>
       </div>
     </div>
     <nav class="topnav">
+      <a href="#tools">Tools</a>
       <a href="#platforms">Platform</a>
       <a href="#how">Cara Pakai</a>
     </nav>
@@ -35,61 +37,116 @@
   <main class="container">
     <section class="hero">
       <span class="pill">Gratis • Cepat • Tanpa Watermark</span>
-      <h1>Download Video & Audio dari Semua Platform</h1>
+      <h1>Semua Downloader &amp; Tools dalam Satu Tempat</h1>
       <p class="subtitle">
-        Tempel link dari TikTok, YouTube, Facebook, Instagram, atau CapCut.
-        Pilih format MP4 atau MP3, lalu unduh dalam sekali klik.
+        Unduh video, audio &amp; gambar dari 17+ platform, cari lagu/video YouTube,
+        dan konversi link panjang—semuanya gratis dan ramah HP.
       </p>
+    </section>
 
-      <form id="dl-form" class="downloader">
-        <div class="input-row">
-          <input
-            id="url"
-            type="url"
-            inputmode="url"
-            placeholder="Tempel link video di sini…"
-            autocomplete="off"
-            required
-          />
-          <button type="button" id="paste-btn" class="ghost-btn" title="Tempel dari clipboard">Tempel</button>
-        </div>
+    <!-- TOOL TABS -->
+    <section id="tools" class="tools">
+      <div class="tabs" role="tablist" aria-label="Pilih tool">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="downloader">
+          <span class="tab-ico">⬇</span><span>Downloader</span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="search">
+          <span class="tab-ico">🔎</span><span>Cari YouTube</span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="audio">
+          <span class="tab-ico">🎵</span><span>Audio / MP3</span>
+        </button>
+      </div>
 
-        <div class="controls">
-          <label class="select-wrap">
-            <span>Platform</span>
-            <select id="platform">
-              <option value="auto">Deteksi otomatis</option>
-              <option value="tiktok">TikTok</option>
-              <option value="youtube">YouTube</option>
-              <option value="facebook">Facebook</option>
-              <option value="instagram">Instagram</option>
-              <option value="capcut">CapCut</option>
-              <option value="twitter">Twitter / X</option>
-              <option value="pinterest">Pinterest</option>
-              <option value="douyin">Douyin</option>
-              <option value="threads">Threads</option>
-            </select>
-          </label>
-
-          <div class="format-toggle" role="group" aria-label="Format">
-            <input type="radio" name="format" id="fmt-all" value="all" checked />
-            <label for="fmt-all">Semua</label>
-            <input type="radio" name="format" id="fmt-mp4" value="mp4" />
-            <label for="fmt-mp4">MP4</label>
-            <input type="radio" name="format" id="fmt-mp3" value="mp3" />
-            <label for="fmt-mp3">MP3</label>
+      <!-- PANEL: DOWNLOADER -->
+      <div class="panel active" id="panel-downloader" role="tabpanel">
+        <form id="dl-form" class="card-form">
+          <div class="input-row">
+            <input id="url" type="url" inputmode="url" placeholder="Tempel link video di sini…" autocomplete="off" required />
+            <button type="button" class="ghost-btn paste-btn" data-target="url" title="Tempel dari clipboard">📋</button>
+            <button type="button" class="ghost-btn clear-btn" data-target="url" title="Bersihkan">✕</button>
           </div>
 
-          <button type="submit" id="go-btn" class="primary-btn">
+          <div class="controls">
+            <label class="select-wrap">
+              <span>Platform</span>
+              <select id="platform">
+                <option value="auto">Deteksi otomatis</option>
+                <option value="tiktok">TikTok</option>
+                <option value="youtube">YouTube</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="capcut">CapCut</option>
+                <option value="twitter">Twitter / X</option>
+                <option value="pinterest">Pinterest</option>
+                <option value="douyin">Douyin</option>
+                <option value="threads">Threads</option>
+                <option value="spotify">Spotify</option>
+                <option value="soundcloud">SoundCloud</option>
+                <option value="mediafire">MediaFire</option>
+                <option value="gdrive">Google Drive</option>
+                <option value="xiaohongshu">Xiaohongshu (RED)</option>
+                <option value="snackvideo">SnackVideo</option>
+                <option value="cocofun">Cocofun</option>
+                <option value="kuaishou">Kuaishou</option>
+              </select>
+            </label>
+
+            <div class="field">
+              <span class="field-label">Format</span>
+              <div class="format-toggle" role="group" aria-label="Format">
+                <input type="radio" name="format" id="fmt-all" value="all" checked />
+                <label for="fmt-all">Semua</label>
+                <input type="radio" name="format" id="fmt-mp4" value="mp4" />
+                <label for="fmt-mp4">Video</label>
+                <input type="radio" name="format" id="fmt-mp3" value="mp3" />
+                <label for="fmt-mp3">Audio</label>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" id="go-btn" class="primary-btn full">
             <span class="btn-label">Download</span>
             <span class="spinner" hidden></span>
           </button>
-        </div>
-      </form>
+        </form>
+        <p class="hint">Contoh: https://www.tiktok.com/@user/video/123…</p>
+      </div>
 
-      <p class="hint">Contoh: https://www.tiktok.com/@user/video/123…</p>
+      <!-- PANEL: YOUTUBE SEARCH -->
+      <div class="panel" id="panel-search" role="tabpanel" hidden>
+        <form id="search-form" class="card-form">
+          <div class="input-row">
+            <input id="query" type="text" inputmode="search" placeholder="Cari lagu / video YouTube…" autocomplete="off" required />
+            <button type="button" class="ghost-btn clear-btn" data-target="query" title="Bersihkan">✕</button>
+          </div>
+          <button type="submit" id="search-btn" class="primary-btn full">
+            <span class="btn-label">Cari</span>
+            <span class="spinner" hidden></span>
+          </button>
+        </form>
+        <p class="hint">Ketik judul lagu, artis, atau topik—lalu pilih untuk diunduh.</p>
+        <div id="search-results" class="search-results"></div>
+      </div>
+
+      <!-- PANEL: AUDIO/MP3 -->
+      <div class="panel" id="panel-audio" role="tabpanel" hidden>
+        <form id="audio-form" class="card-form">
+          <div class="input-row">
+            <input id="audio-url" type="url" inputmode="url" placeholder="Tempel link YouTube / TikTok / Spotify…" autocomplete="off" required />
+            <button type="button" class="ghost-btn paste-btn" data-target="audio-url" title="Tempel dari clipboard">📋</button>
+            <button type="button" class="ghost-btn clear-btn" data-target="audio-url" title="Bersihkan">✕</button>
+          </div>
+          <button type="submit" id="audio-btn" class="primary-btn full">
+            <span class="btn-label">Ambil Audio MP3</span>
+            <span class="spinner" hidden></span>
+          </button>
+        </form>
+        <p class="hint">Khusus ekstraksi audio/MP3 dari link video atau musik.</p>
+      </div>
     </section>
 
+    <!-- RESULT -->
     <section id="result" class="result" hidden>
       <div class="result-card">
         <div class="result-media">
@@ -116,6 +173,15 @@
         <div class="platform"><span>𝕏</span>Twitter</div>
         <div class="platform"><span>📌</span>Pinterest</div>
         <div class="platform"><span>🧵</span>Threads</div>
+        <div class="platform"><span>🎧</span>Spotify</div>
+        <div class="platform"><span>☁️</span>SoundCloud</div>
+        <div class="platform"><span>📁</span>MediaFire</div>
+        <div class="platform"><span>🗂️</span>G-Drive</div>
+        <div class="platform"><span>📕</span>Xiaohongshu</div>
+        <div class="platform"><span>🎬</span>Douyin</div>
+        <div class="platform"><span>🍿</span>SnackVideo</div>
+        <div class="platform"><span>🥥</span>Cocofun</div>
+        <div class="platform"><span>⚡</span>Kuaishou</div>
       </div>
     </section>
 
@@ -123,7 +189,7 @@
       <h2>Cara pakai</h2>
       <ol>
         <li><strong>Salin link</strong> video dari aplikasi atau browser.</li>
-        <li><strong>Tempel</strong> di kolom di atas dan pilih format (MP4/MP3).</li>
+        <li><strong>Tempel</strong> di kolom di atas dan pilih format (Video/Audio).</li>
         <li><strong>Klik Download</strong> lalu pilih kualitas yang muncul.</li>
       </ol>
     </section>
@@ -132,6 +198,17 @@
   <footer class="footer">
     <p>© <span id="year"></span> dmaz alyxers. Gunakan hanya untuk konten yang Anda miliki haknya atau yang diizinkan untuk diunduh.</p>
   </footer>
+
+  <!-- Mobile bottom navigation -->
+  <nav class="bottom-nav" aria-label="Navigasi tool (mobile)">
+    <button class="bn-item active" data-tab="downloader"><span>⬇</span><small>Download</small></button>
+    <button class="bn-item" data-tab="search"><span>🔎</span><small>Cari</small></button>
+    <button class="bn-item" data-tab="audio"><span>🎵</span><small>Audio</small></button>
+    <button class="bn-item" data-scroll="platforms"><span>🌐</span><small>Platform</small></button>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="app.js"></script>
 </body>
