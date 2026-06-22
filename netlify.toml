@@ -1,0 +1,19 @@
+# Netlify configuration for dmaz alyxers
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Friendly API path -> serverless function
+[[redirects]]
+  from = "/api/download"
+  to = "/.netlify/functions/download"
+  status = 200
+
+# SPA-style fallback so the homepage always loads
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[functions]
+  node_bundler = "esbuild"
